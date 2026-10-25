@@ -1355,703 +1355,703 @@
       "id": "form.cover_language",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.5,
+        "y": 37.9,
+        "w": 94.8,
+        "h": 3.3
       },
       "spoken": "On page 1 of the application, the box labeled \"What is your preferred language?\".",
       "caption": "Page 1: What is your preferred language?",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s1_name",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 47.7,
+        "w": 94.1,
+        "h": 4.2
       },
       "spoken": "On page 1 of the application, the box labeled \"First name / Middle initial / Last name / Suffix (Sr., Jr., etc.)\".",
       "caption": "Page 1: First name / Middle initial / Last name / Suffix (Sr., Jr., etc.)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s1_ssn",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 51.9,
+        "w": 33.3,
+        "h": 4.2
       },
       "spoken": "On page 1 of the application, the box labeled \"Social Security number\".",
       "caption": "Page 1: Social Security number",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s1_dob",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 36.3,
+        "y": 51.9,
+        "w": 31,
+        "h": 4.2
       },
       "spoken": "On page 1 of the application, the box labeled \"Date of birth\".",
       "caption": "Page 1: Date of birth",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s1_sex",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 67.3,
+        "y": 51.9,
+        "w": 29.7,
+        "h": 4.2
       },
       "spoken": "On page 1 of the application, the box labeled \"Sex (Male / Female)\".",
       "caption": "Page 1: Sex (Male / Female)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s1_marital_status",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 56.1,
+        "w": 50,
+        "h": 4.3
       },
       "spoken": "On page 1 of the application, the box labeled \"Marital status (Single / Married / Widowed / Divorced/separated)\".",
       "caption": "Page 1: Marital status (Single / Married / Widowed / Divorced/separated)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s1_hispanic",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 52.9,
+        "y": 56.1,
+        "w": 44.1,
+        "h": 4.3
       },
       "spoken": "On page 1 of the application, the box labeled \"Are you Hispanic or Latino? (optional)\".",
       "caption": "Page 1: Are you Hispanic or Latino? (optional)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s1_race",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 60.4,
+        "w": 94.1,
+        "h": 9.5
       },
       "spoken": "On page 1 of the application, the box labeled \"Race (optional – you may mark one or more)\".",
       "caption": "Page 1: Race (optional – you may mark one or more)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s2_mailing_address",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 73.6,
+        "w": 47.1,
+        "h": 10.5
       },
       "spoken": "On page 1 of the application, the box labeled \"Mailing Address (P.O. box or street address, Apt/Lot #, City, State, Zip)\".",
       "caption": "Page 1: Mailing Address (P.O. box or street address, Apt/Lot #, City, State, Zip)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s2_home_address",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 50,
+        "y": 73.6,
+        "w": 47.1,
+        "h": 10.5
       },
       "spoken": "On page 1 of the application, the box labeled \"Home Address (if different)\".",
       "caption": "Page 1: Home Address (if different)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s2_email",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 84.1,
+        "w": 47.1,
+        "h": 4.5
       },
       "spoken": "On page 1 of the application, the box labeled \"E-mail address (if you have one)\".",
       "caption": "Page 1: E-mail address (if you have one)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s2_parish",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 50,
+        "y": 84.1,
+        "w": 47.1,
+        "h": 4.5
       },
       "spoken": "On page 1 of the application, the box labeled \"Home parish (where you live)\".",
       "caption": "Page 1: Home parish (where you live)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s2_phones",
       "image": "form/page-1.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 88.6,
+        "w": 94.1,
+        "h": 4.2
       },
       "spoken": "On page 1 of the application, the box labeled \"Home phone / Cell phone / Other phone\".",
       "caption": "Page 1: Home phone / Cell phone / Other phone",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s3_spouse_name",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 7.1,
+        "w": 94.1,
+        "h": 4.2
       },
       "spoken": "On page 2 of the application, the box labeled \"Spouse: First name / Middle initial / Last name / Suffix\".",
       "caption": "Page 2: Spouse: First name / Middle initial / Last name / Suffix",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s3_spouse_ssn",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 11.2,
+        "w": 31.5,
+        "h": 4.2
       },
       "spoken": "On page 2 of the application, the box labeled \"Spouse: Social Security number\".",
       "caption": "Page 2: Spouse: Social Security number",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s3_spouse_dob",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 34.5,
+        "y": 11.2,
+        "w": 30.9,
+        "h": 4.2
       },
       "spoken": "On page 2 of the application, the box labeled \"Spouse: Date of birth\".",
       "caption": "Page 2: Spouse: Date of birth",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s3_spouse_sex",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 65.4,
+        "y": 11.2,
+        "w": 31.7,
+        "h": 4.2
       },
       "spoken": "On page 2 of the application, the box labeled \"Spouse: Sex (Male / Female)\".",
       "caption": "Page 2: Spouse: Sex (Male / Female)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s3_spouse_hispanic",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 15.4,
+        "w": 30.9,
+        "h": 6.2
       },
       "spoken": "On page 2 of the application, the box labeled \"Is he/she Hispanic or Latino? (optional)\".",
       "caption": "Page 2: Is he/she Hispanic or Latino? (optional)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s3_spouse_race",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 33.8,
+        "y": 15.4,
+        "w": 63.2,
+        "h": 6.2
       },
       "spoken": "On page 2 of the application, the box labeled \"Spouse: Race (optional – you may mark one or more)\".",
       "caption": "Page 2: Spouse: Race (optional – you may mark one or more)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s4_medicare_number",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 30.1,
+        "w": 62.1,
+        "h": 2.3
       },
       "spoken": "On page 2 of the application, the box labeled \"Medicare Claim Number (You)\".",
       "caption": "Page 2: Medicare Claim Number (You)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s4_other_insurance",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 32.3,
+        "w": 62.1,
+        "h": 6.2
       },
       "spoken": "On page 2 of the application, the box labeled \"Does this person have health insurance (other than Medicare) or a Medicare supplement? (You)\".",
       "caption": "Page 2: Does this person have health insurance (other than Medicare) or a Medicare supplement? (You)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s4_spouse_medicare_number",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 65,
+        "y": 30.1,
+        "w": 32,
+        "h": 2.3
       },
       "spoken": "On page 2 of the application, the box labeled \"Medicare Claim Number (Your Spouse)\".",
       "caption": "Page 2: Medicare Claim Number (Your Spouse)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s4_spouse_other_insurance",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 65,
+        "y": 32.3,
+        "w": 32,
+        "h": 6.2
       },
       "spoken": "On page 2 of the application, the box labeled \"Does this person have health insurance (other than Medicare) or a Medicare supplement? (Your Spouse)\".",
       "caption": "Page 2: Does this person have health insurance (other than Medicare) or a Medicare supplement? (Your Spouse)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s5_worker_name",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 47,
+        "w": 94.1,
+        "h": 2.4
       },
       "spoken": "On page 2 of the application, the box labeled \"Worker's name\".",
       "caption": "Page 2: Worker's name",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s5_employer_name",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 49.4,
+        "w": 94.1,
+        "h": 2.4
       },
       "spoken": "On page 2 of the application, the box labeled \"Employer name\".",
       "caption": "Page 2: Employer name",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s5_employer_phone",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 51.8,
+        "w": 94.1,
+        "h": 2.4
       },
       "spoken": "On page 2 of the application, the box labeled \"Employer phone number\".",
       "caption": "Page 2: Employer phone number",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s5_self_employed",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 54.2,
+        "w": 94.1,
+        "h": 2.4
       },
       "spoken": "On page 2 of the application, the box labeled \"Is this person self-employed?\".",
       "caption": "Page 2: Is this person self-employed?",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s5_gross_pay",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 56.6,
+        "w": 94.1,
+        "h": 4.3
       },
       "spoken": "On page 2 of the application, the box labeled \"How much are they paid? (gross income before taxes)\".",
       "caption": "Page 2: How much are they paid? (gross income before taxes)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s5_pay_frequency",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 60.9,
+        "w": 94.1,
+        "h": 4.3
       },
       "spoken": "On page 2 of the application, the box labeled \"How often paid? (weekly, biweekly, monthly, etc.)\".",
       "caption": "Page 2: How often paid? (weekly, biweekly, monthly, etc.)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s6_who_receives",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 73.6,
+        "w": 94.1,
+        "h": 4.3
       },
       "spoken": "On page 2 of the application, the box labeled \"Who receives the money?\".",
       "caption": "Page 2: Who receives the money?",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s6_source",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 77.9,
+        "w": 94.1,
+        "h": 4.2
       },
       "spoken": "On page 2 of the application, the box labeled \"Where does it come from?\".",
       "caption": "Page 2: Where does it come from?",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s6_gross_amount",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 82.1,
+        "w": 94.1,
+        "h": 4.3
       },
       "spoken": "On page 2 of the application, the box labeled \"How much are they paid? (gross income before taxes)\".",
       "caption": "Page 2: How much are they paid? (gross income before taxes)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s6_frequency",
       "image": "form/page-2.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 86.4,
+        "w": 94.1,
+        "h": 4.3
       },
       "spoken": "On page 2 of the application, the box labeled \"How often paid? (weekly, biweekly, monthly, etc.)\".",
       "caption": "Page 2: How often paid? (weekly, biweekly, monthly, etc.)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s7_who_received_care",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 11,
+        "w": 94.1,
+        "h": 2.4
       },
       "spoken": "On page 3 of the application, the box labeled \"Who received care?\".",
       "caption": "Page 3: Who received care?",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s7_provider",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 13.4,
+        "w": 94.1,
+        "h": 4.3
       },
       "spoken": "On page 3 of the application, the box labeled \"Name of doctor, clinic, or other medical provider\".",
       "caption": "Page 3: Name of doctor, clinic, or other medical provider",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s7_provider_phone",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 17.7,
+        "w": 94.1,
+        "h": 2.4
       },
       "spoken": "On page 3 of the application, the box labeled \"Phone number\".",
       "caption": "Page 3: Phone number",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s7_dates",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 20.1,
+        "w": 94.1,
+        "h": 2.4
       },
       "spoken": "On page 3 of the application, the box labeled \"Dates of service\".",
       "caption": "Page 3: Dates of service",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s7_total_cost",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 22.5,
+        "w": 94.1,
+        "h": 2.4
       },
       "spoken": "On page 3 of the application, the box labeled \"Total cost\".",
       "caption": "Page 3: Total cost",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_checking",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 33.6,
+        "w": 94.1,
+        "h": 4.7
       },
       "spoken": "On page 3 of the application, the box labeled \"Checking accounts\".",
       "caption": "Page 3: Checking accounts",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_savings",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 38.3,
+        "w": 94.1,
+        "h": 4.8
       },
       "spoken": "On page 3 of the application, the box labeled \"Savings accounts\".",
       "caption": "Page 3: Savings accounts",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_direct_express",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 43.1,
+        "w": 94.1,
+        "h": 4.7
       },
       "spoken": "On page 3 of the application, the box labeled \"Direct express accounts\".",
       "caption": "Page 3: Direct express accounts",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_vehicle",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 47.7,
+        "w": 94.1,
+        "h": 5.9
       },
       "spoken": "On page 3 of the application, the box labeled \"Vehicle (cars, trucks, boats, motorcycles, RVs, ATVs, etc.)\".",
       "caption": "Page 3: Vehicle (cars, trucks, boats, motorcycles, RVs, ATVs, etc.)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_other_vehicles",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 53.7,
+        "w": 94.1,
+        "h": 4.5
       },
       "spoken": "On page 3 of the application, the box labeled \"Other vehicles\".",
       "caption": "Page 3: Other vehicles",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_other_property",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 58.2,
+        "w": 94.1,
+        "h": 5.9
       },
       "spoken": "On page 3 of the application, the box labeled \"Property other than where you live\".",
       "caption": "Page 3: Property other than where you live",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_cd",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 64.1,
+        "w": 94.1,
+        "h": 4.8
       },
       "spoken": "On page 3 of the application, the box labeled \"Certificates of Deposit (CD)\".",
       "caption": "Page 3: Certificates of Deposit (CD)",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_investments",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 68.9,
+        "w": 94.1,
+        "h": 5.9
       },
       "spoken": "On page 3 of the application, the box labeled \"Annuities, trusts, stocks, bonds, retirement accounts\".",
       "caption": "Page 3: Annuities, trusts, stocks, bonds, retirement accounts",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_life_burial_insurance",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 74.9,
+        "w": 94.1,
+        "h": 4.7
       },
       "spoken": "On page 3 of the application, the box labeled \"Life or burial insurance\".",
       "caption": "Page 3: Life or burial insurance",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_burial_funds",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 79.5,
+        "w": 94.1,
+        "h": 5.9
       },
       "spoken": "On page 3 of the application, the box labeled \"Money set aside for burial or pre-need contract\".",
       "caption": "Page 3: Money set aside for burial or pre-need contract",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_safe_deposit",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 85.5,
+        "w": 94.1,
+        "h": 4.5
       },
       "spoken": "On page 3 of the application, the box labeled \"Safe deposit box\".",
       "caption": "Page 3: Safe deposit box",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.s8_other",
       "image": "form/page-3.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 90,
+        "w": 94.1,
+        "h": 4.8
       },
       "spoken": "On page 3 of the application, the box labeled \"Other\".",
       "caption": "Page 3: Other",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.rights_read",
       "image": "form/page-4.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 2.5,
+        "w": 94.1,
+        "h": 93.4
       },
       "spoken": "On page 4 of the application, the box labeled \"Your Rights and Responsibilities\".",
       "caption": "Page 4: Your Rights and Responsibilities",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.sign_applicant",
       "image": "form/page-5.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 14.3,
+        "w": 94.1,
+        "h": 4.2
       },
       "spoken": "On page 5 of the application, the box labeled \"Sign here: / Date:\".",
       "caption": "Page 5: Sign here: / Date:",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.sign_spouse",
       "image": "form/page-5.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 18.4,
+        "w": 94.1,
+        "h": 4.3
       },
       "spoken": "On page 5 of the application, the box labeled \"Spouse sign here (if applying): / Date:\".",
       "caption": "Page 5: Spouse sign here (if applying): / Date:",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "form.sign_comments",
       "image": "form/page-5.png",
       "box": {
-        "x": 5,
-        "y": 10,
-        "w": 90,
-        "h": 4
+        "x": 2.9,
+        "y": 24.2,
+        "w": 94.1,
+        "h": 36.4
       },
       "spoken": "On page 5 of the application, the box labeled \"Use this space for any comments or information that you could not fit on your application.\".",
       "caption": "Page 5: Use this space for any comments or information that you could not fit on your application.",
-      "placeholder": true
+      "placeholder": false
     },
     {
       "id": "doc.medicare_card.name",

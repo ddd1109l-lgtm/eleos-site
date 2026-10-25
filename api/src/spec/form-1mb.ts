@@ -22,19 +22,97 @@ type FieldInput = Omit<Field, "required" | "condition" | "sensitive" | "sourceDo
 
 const formAids: Aid[] = [];
 
+/**
+ * Answer areas on the official PDF, in PDF points [x0, top, x1, bottom] on a 612 x 792 page.
+ * Measured from the LDH PDF (Rev. 3/22) with pdfplumber and checked against rendered pages.
+ * Repeating columns (jobs, income sources, bills) highlight the whole row.
+ */
+const PAGE_W = 612;
+const PAGE_H = 792;
+const FORM_BOXES_PT: Record<string, [number, number, number, number]> = {
+  cover_language: [15, 300, 595, 326],
+  s1_name: [18, 378, 594, 411],
+  s1_ssn: [18, 411, 222, 444],
+  s1_dob: [222, 411, 412, 444],
+  s1_sex: [412, 411, 594, 444],
+  s1_marital_status: [18, 444, 324, 478],
+  s1_hispanic: [324, 444, 594, 478],
+  s1_race: [18, 478, 594, 553],
+  s2_mailing_address: [18, 583, 306, 666],
+  s2_home_address: [306, 583, 594, 666],
+  s2_email: [18, 666, 306, 702],
+  s2_parish: [306, 666, 594, 702],
+  s2_phones: [18, 702, 594, 735],
+  s3_spouse_name: [18, 56, 594, 89],
+  s3_spouse_ssn: [18, 89, 211, 122],
+  s3_spouse_dob: [211, 89, 400, 122],
+  s3_spouse_sex: [400, 89, 594, 122],
+  s3_spouse_hispanic: [18, 122, 207, 171],
+  s3_spouse_race: [207, 122, 594, 171],
+  s4_medicare_number: [18, 238, 398, 256],
+  s4_spouse_medicare_number: [398, 238, 594, 256],
+  s4_other_insurance: [18, 256, 398, 305],
+  s4_spouse_other_insurance: [398, 256, 594, 305],
+  s5_worker_name: [18, 372, 594, 391],
+  s5_employer_name: [18, 391, 594, 410],
+  s5_employer_phone: [18, 410, 594, 429],
+  s5_self_employed: [18, 429, 594, 448],
+  s5_gross_pay: [18, 448, 594, 482],
+  s5_pay_frequency: [18, 482, 594, 516],
+  s6_who_receives: [18, 583, 594, 617],
+  s6_source: [18, 617, 594, 650],
+  s6_gross_amount: [18, 650, 594, 684],
+  s6_frequency: [18, 684, 594, 718],
+  s7_who_received_care: [18, 87, 594, 106],
+  s7_provider: [18, 106, 594, 140],
+  s7_provider_phone: [18, 140, 594, 159],
+  s7_dates: [18, 159, 594, 178],
+  s7_total_cost: [18, 178, 594, 197],
+  s8_checking: [18, 266, 594, 303],
+  s8_savings: [18, 303, 594, 341],
+  s8_direct_express: [18, 341, 594, 378],
+  s8_vehicle: [18, 378, 594, 425],
+  s8_other_vehicles: [18, 425, 594, 461],
+  s8_other_property: [18, 461, 594, 508],
+  s8_cd: [18, 508, 594, 546],
+  s8_investments: [18, 546, 594, 593],
+  s8_life_burial_insurance: [18, 593, 594, 630],
+  s8_burial_funds: [18, 630, 594, 677],
+  s8_safe_deposit: [18, 677, 594, 713],
+  s8_other: [18, 713, 594, 751],
+  rights_read: [18, 20, 594, 760],
+  sign_applicant: [18, 113, 594, 146],
+  sign_spouse: [18, 146, 594, 180],
+  sign_comments: [18, 192, 594, 480],
+};
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+function formBox(id: string) {
+  const b = FORM_BOXES_PT[id];
+  if (!b) return null;
+  const [x0, top, x1, bottom] = b;
+  return {
+    x: round1((x0 / PAGE_W) * 100),
+    y: round1((top / PAGE_H) * 100),
+    w: round1(((x1 - x0) / PAGE_W) * 100),
+    h: round1(((bottom - top) / PAGE_H) * 100),
+  };
+}
+
 function f(input: FieldInput): Field {
   const { docAids = [], ...rest } = input;
   const aids: string[] = [];
   // Every non-gate field gets a "where this goes on the paper form" aid.
   if (rest.kind !== "gate") {
     const id = `form.${rest.id}`;
+    const measured = formBox(rest.id);
     formAids.push({
       id,
       image: `form/page-${rest.page}.png`,
-      box: { x: 5, y: 10, w: 90, h: 4 },
+      box: measured ?? { x: 5, y: 10, w: 90, h: 4 },
       spoken: `On page ${rest.page} of the application, the box labeled "${rest.label}".`,
       caption: `Page ${rest.page}: ${rest.label}`,
-      placeholder: true,
+      placeholder: measured === null,
     });
     aids.push(id);
   }

@@ -1,6 +1,6 @@
 # Medicare Enrollment Guide: Frontend Spec
 
-**For Leigh's AI builder.** Paste this whole file into your AI tool as the build brief. Also copy the `contract/` folder into the project: `form-spec.json` is the real form data and `fixtures/` holds real example API responses so the app works before the backend is deployed.
+**For Leigh's AI builder.** Paste this whole file into your AI tool as the build brief. The repo is `github.com/mjacobsongoodacc/eleos`: build the frontend in `web/`. Copy `api/contract/` into the frontend project: `form-spec.json` is the real form data and `fixtures/` holds real example API responses so the app works before the backend is deployed.
 
 Backend owner: Max Jacobson. Backend runs at `VITE_API_URL` (for example `http://localhost:8787/api`). If `VITE_API_URL` is empty, the app runs in mock mode from `contract/`.
 
@@ -205,9 +205,9 @@ Put them in `public/aids/`. All made-up data, stamped SAMPLE diagonally, built i
 | `docs/sample_bank_statement.png` | Bank name, Dorothy's name, statement period, ending balance about $2,400. |
 | `docs/sample_pension_statement.png` | Payer (City of New Orleans) and gross monthly amount $500 (for persona Ray). |
 | `docs/sample_pay_stub.png` | Employer, pay period, gross pay $600 biweekly (for persona Gloria). |
-| `form/page-1.png` … `form/page-5.png` | Pages 1–5 of the official PDF. Max is generating these. |
+| `form/page-1.png` … `form/page-5.png` | **Already done.** Copy `contract/aids/form/` to `public/aids/form/`. These are pages 1–5 of the official PDF at 1275 × 1650, and every form highlight box in the spec is measured against them. |
 
-**When you finish a mock document, send Max the pixel position of each highlighted line** (top-left x, y and width, height). He converts them to the percent boxes in the spec. Boxes marked `placeholder: true` are rough until then.
+**When you finish a mock document, send Max the pixel position of each highlighted line** (top-left x, y and width, height). He converts them to the percent boxes in the spec. Only the 6 document aids (`doc.*`) are still `placeholder: true`; all form-page boxes are final.
 
 ## 11. Demo flow (3 minutes, must work perfectly)
 

@@ -101,3 +101,13 @@ describe("sanitizeProgress", () => {
     expect(p).toEqual({ answers: { s5_anyone_works: "no" }, done: ["s1_name"] });
   });
 });
+
+describe("form highlight boxes", () => {
+  it("every form aid has a measured box inside the page", () => {
+    for (const a of formSpec.aids.filter((a) => a.id.startsWith("form."))) {
+      expect(a.placeholder, a.id).toBe(false);
+      expect(a.box.x + a.box.w, a.id).toBeLessThanOrEqual(100);
+      expect(a.box.y + a.box.h, a.id).toBeLessThanOrEqual(100);
+    }
+  });
+});

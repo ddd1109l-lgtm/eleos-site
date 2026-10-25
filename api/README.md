@@ -8,7 +8,7 @@ Backend for the Freeman AI Innovation Challenge entry. Guides a person through L
 npm install
 cp .env.example .env      # add MODEL_API_KEY (Groq: console.groq.com/keys)
 npm run dev               # http://localhost:8787/api
-npm test                  # 49 tests: privacy filter, branching for all 3 personas, tool guardrails, API
+npm test                  # 50 tests: privacy filter, branching for all 3 personas, tool guardrails, API
 npm run smoke             # live check against the real model (needs the key)
 npm run contract          # regenerate contract/ for the frontend after editing the spec
 ```
@@ -55,7 +55,6 @@ Vercel picks up `src/index.ts` (exports the Hono app). Set the same env vars in 
 
 ## Still to do
 
-- Form page images: download the official PDF, `pdftoppm -r 150 -png MedicareSavingsProgram.pdf form/page` for pages 1–5.
-- Real highlight boxes: every aid with `placeholder: true` (form boxes via the PDF, document boxes from Leigh's mock layouts).
+- Document highlight boxes: the 6 `doc.*` aids are still `placeholder: true` until Leigh's mock documents exist. Form-page boxes are measured (`FORM_BOXES_PT` in `src/spec/form-1mb.ts`) and the page images are in `contract/aids/form/` (rendered from `assets/MedicareSavingsProgram.pdf` at 150 dpi).
 - `npm run smoke` with the real key; tune the prompt on anything that fails.
 - Counselor review of the spec (LaSHIP call Monday).
