@@ -72,7 +72,7 @@ export default function Chat({ fieldId, localFieldId, progress, pending, onPerso
     const history: Turn[] = [...past.map(({ role, content }): Turn => ({ role, content })), { role: "user" as const, content: text }].slice(-12);
     setInput("");
     setBusy(true);
-    if (API_URL) await sendToBackend(text, history, mode);
+    if (API_URL) await sendToBackend(text, masked.length > 0, history, mode);
     else await sendToLocal(text, masked.length > 0, history);
     setBusy(false);
   }
@@ -106,7 +106,7 @@ export default function Chat({ fieldId, localFieldId, progress, pending, onPerso
   }
 
   // Backend mode: show "Sending…", then render the masked userMessage the API returns (spec 7).
-  async function sendToBackend(text: string, history: { role: "user" | "assistant"; content: string }[], mode: "text" | "voice") {
+  async function sendToBackend(text: string, masked: boolean, history: { role: "user" | "assistant"; content: string }[], mode: "text" | "voice") {
     const user: Msg = { id: nextId++, role: "user", content: "Sending…", pending: true };
     const reply: Msg = { id: nextId++, role: "assistant", content: "" };
     setMessages((m) => [...m, user, reply]);
@@ -118,7 +118,8 @@ export default function Chat({ fieldId, localFieldId, progress, pending, onPerso
       });
       const data = (await res.json().catch(() => null)) as ChatResponse | null;
       if (!res.ok || !data || typeof data.reply !== "string") throw new Error(`chat ${res.status}`);
-      const notes: Msg[] = data.privacy?.masked ? [{ id: nextId++, role: "note", content: data.privacy.notice ?? ui("privacyNote") }] : [];
+      // send() masks before sending, so the API usually never sees the number; show the note for either mask.
+      const notes: Msg[] = masked || data.privacy?.masked ? [{ id: nextId++, role: "note", content: data.privacy?.notice ?? ui("privacyNote") }] : [];
       setMessages((m) =>
         m.flatMap((x) =>
           x.id === user.id ? [{ ...x, content: data.userMessage ?? text, pending: false }, ...notes] : x.id === reply.id ? [{ ...x, content: data.reply, degraded: data.degraded }] : [x],

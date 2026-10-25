@@ -20,9 +20,9 @@ const strings: Record<string, string> = {
   "ui.textLarge": "Chữ lớn",
   "ui.textLargest": "Chữ lớn nhất",
   "ui.talkToPerson": "Nói chuyện với người thật",
-  "ui.liveChat": "Trò chuyện trực tiếp 24/7",
+  "ui.liveChat": "Hỏi Dr. Fawn",
   "ui.chatShort": "Trò chuyện",
-  "ui.online": "Đang trực tuyến · trả lời 24/7",
+  "ui.online": "Hướng dẫn AI · trả lời bất cứ lúc nào",
   "ui.preferPerson": "Muốn nói với người thật? Cố vấn miễn phí",
   "ui.home": "Trang chủ",
 

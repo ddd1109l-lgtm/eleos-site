@@ -873,10 +873,9 @@ export const TERMS: Term[] = [
 // Facts the chatbot may use beyond the form itself. All verified in the research packet.
 export const FACTS = `
 Programs (Louisiana uses the federal 2026 standards, effective March 1, 2026; LDH Eligibility Manual Z-200):
-- QMB (Qualified Medicare Beneficiary): pays Part A and Part B premiums, deductibles, coinsurance, and copays. Countable income limit $1,330 single / $1,804 couple (about $1,350 / $1,824 before the $20 deduction).
-- SLMB (Specified Low-Income Medicare Beneficiary): pays the Part B premium. Countable limit below $1,596 single / $2,164 couple (about $1,616 / $2,184 gross).
-- QI (Qualifying Individual): pays the Part B premium; you must reapply every year. Countable limit below $1,796 single / $2,435 couple (about $1,816 / $2,455 gross).
-How Louisiana counts income: subtract $20 from total monthly income. For wages, also subtract $65 and then count half of what is left.
+- QMB (Qualified Medicare Beneficiary): pays Part A and Part B premiums, deductibles, coinsurance, and copays.
+- SLMB (Specified Low-Income Medicare Beneficiary): pays the Part B premium.
+- QI (Qualifying Individual): pays the Part B premium; you must reapply every year.
 Louisiana does NOT count savings or other resources for QMB, SLMB, or QI. Section 8 still asks; answer every row yes or no.
 The 2026 Medicare Part B premium is $202.90 per month.
 Anyone approved for a Medicare Savings Program automatically gets Extra Help with prescription drug costs.

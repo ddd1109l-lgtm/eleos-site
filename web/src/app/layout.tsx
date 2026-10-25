@@ -20,7 +20,7 @@ const fredoka = Fredoka({
 export const metadata: Metadata = {
   title: "Eleos · Medicare Savings helper",
   description:
-    "Tap any word on Louisiana's Medicare Savings Program application to hear and read what it means in plain language, in your language, and ask Pelly questions as you fill it out.",
+    "Tap any word on Louisiana's Medicare Savings Program application to hear and read what it means in plain language, in your language, and ask Dr. Fawn questions as you fill it out.",
 };
 
 export const viewport: Viewport = {

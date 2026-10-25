@@ -20,9 +20,9 @@ export const UI = {
   textLarge: "Large text",
   textLargest: "Largest text",
   talkToPerson: "Talk to a person",
-  liveChat: "Live chat 24/7",
+  liveChat: "Ask Dr. Fawn",
   chatShort: "Chat",
-  online: "Online now · answers 24/7",
+  online: "AI guide · answers any time",
   preferPerson: "Prefer a real person? Free counselors",
   home: "Home",
 

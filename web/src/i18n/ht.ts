@@ -20,9 +20,9 @@ const strings: Record<string, string> = {
   "ui.textLarge": "Tèks gwo",
   "ui.textLargest": "Tèks pi gwo",
   "ui.talkToPerson": "Pale ak yon moun",
-  "ui.liveChat": "Chat an dirèk 24/7",
+  "ui.liveChat": "Mande Dr. Fawn",
   "ui.chatShort": "Chat",
-  "ui.online": "Sou entènèt kounye a · reponn 24/7",
+  "ui.online": "Gid IA · reponn nenpòt lè",
   "ui.preferPerson": "Ou pito yon vrè moun? Konseye gratis",
   "ui.home": "Akèy",
 

@@ -11,7 +11,7 @@ import type { Aid, Progress } from "@/contract/spec-types";
 
 const OPEN_EVENT = "eleos:open-chat";
 
-/** Opens Dr. Fawn's chat from anywhere on the page (for example the header's Live chat button). */
+/** Opens Dr. Fawn's chat from anywhere on the page (for example the header's Ask Dr. Fawn button). */
 export const openChat = () => window.dispatchEvent(new Event(OPEN_EVENT));
 
 type Props = {

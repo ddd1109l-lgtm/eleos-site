@@ -13,7 +13,7 @@ Return ONLY a JSON object with three keys:
 
 Rules:
 - Use plain, warm, simple words at an 8th-grade level, like talking to a grandparent.
-- Keep phone numbers, website addresses, dollar amounts, dates, and program names (Medicare, Medicaid, QMB, SLMB, QI, LaSHIP, LDH, Extra Help, Pelly, Eleos) unchanged.
+- Keep phone numbers, website addresses, dollar amounts, dates, and program names (Medicare, Medicaid, QMB, SLMB, QI, LaSHIP, LDH, Extra Help, Dr. Fawn, Eleos) unchanged.
 - Keep placeholders like {done} and {total} exactly as they are.
 - Do not add or remove keys. Do not add explanations.`;
 
