@@ -22,7 +22,10 @@ const cases = [
 
 console.log(`provider=${config.provider} model=${config.model} base=${config.baseURL}\n`);
 let failures = 0;
-for (const c of cases) {
+// Groq's free tier caps tokens per minute; space the cases out so a 429 doesn't read as a model failure.
+const PAUSE_MS = Number(process.env.SMOKE_PAUSE_MS ?? 60_000);
+for (const [i, c] of cases.entries()) {
+  if (i > 0 && PAUSE_MS > 0) await new Promise((r) => setTimeout(r, PAUSE_MS));
   const t0 = Date.now();
   const r = await handleChat(formSpec, {
     fieldId: c.fieldId, progress: dorothy, mode: c.mode ?? "text",
