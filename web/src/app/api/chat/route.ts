@@ -17,13 +17,13 @@ const SPEC = JSON.stringify({
   glossary: TERMS,
 });
 
-const SYSTEM = `You are a friendly helper sitting beside someone filling out Louisiana's paper Medicare Savings Program application (${FORM.code}). Many users are older adults.
+const SYSTEM = `You are Dr. Fawn, a gentle, caring, efficient guide (drawn as a friendly deer in a doctor's coat) sitting beside someone filling out Louisiana's paper Medicare Savings Program application (${FORM.code}). Many users are older adults.
 
 Rules:
-1. Answer only from the FORM SPEC and VERIFIED FACTS below. If they don't cover the question, say you're not sure and suggest LaSHIP, the free Medicare counseling line, at 1-800-259-5300.
+1. You are available 24/7. Help with any question about this form, Medicare, Medicaid, Extra Help, or how to use this website. For facts (income limits, phone numbers, rules, deadlines), use only the FORM SPEC and VERIFIED FACTS below. If they don't cover it, say you're not sure and suggest LaSHIP, the free Medicare counseling line, at 1-800-259-5300.
 2. Never ask for, repeat, or guess a Social Security number, Medicare number, or health details. If the user shares one, tell them to write it on the paper form instead.
 3. Never say whether the user qualifies or will be approved. Louisiana decides. Encourage them to apply even if they're not sure.
-4. Do not mention back payments or retroactive coverage.
+4. Do not mention back payments or retroactive coverage. You are not a real doctor: never give medical advice.
 5. Use plain language at an 8th-grade reading level. Short sentences. One idea at a time. Keep answers under 90 words unless asked for more. No markdown headings or tables; short lists are fine.
 6. When it helps, name the section of the form (for example "Section 6, Other Money").
 
@@ -41,10 +41,18 @@ function clean(messages: ChatMessage[]) {
 }
 
 export async function POST(req: Request) {
-  const body = (await req.json()) as { messages?: ChatMessage[]; fieldId?: string };
+  // fieldId is the shared engine id; localFieldId is the region of the page the user tapped.
+  // progress arrives already stripped of clientOnly answers and is not needed here.
+  const body = (await req.json()) as { messages?: ChatMessage[]; fieldId?: string; localFieldId?: string; language?: string };
   const messages = clean(body.messages ?? []);
-  const field = FIELDS.find((f) => f.id === body.fieldId);
+  const field = FIELDS.find((f) => f.id === body.localFieldId);
   const question = messages.at(-1)?.content ?? "";
+
+  const language = typeof body.language === "string" && body.language.length < 60 ? body.language : "English";
+  const languageRule =
+    language === "English"
+      ? ""
+      : `\n\nReply in ${language}. When you quote words printed on the form, give the English words in quotes first so the user can find them on the paper form, then explain in ${language}.`;
 
   const context = field
     ? `\n\nThe user is currently looking at the field "${field.label}" (id ${field.id}) in section "${SECTIONS.find((s) => s.id === field.section)?.title}".`
@@ -57,7 +65,7 @@ export async function POST(req: Request) {
       try {
         const result = streamText({
           model: MODEL,
-          system: SYSTEM + context,
+          system: SYSTEM + context + languageRule,
           messages,
           temperature: 0.2,
         });

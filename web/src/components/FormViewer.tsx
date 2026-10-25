@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { FORM, fieldAt, type Box } from "@/data/form";
 import { splitTerms } from "@/lib/terms";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const PAGE_W = 612;
 const PAGE_H = 792;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export default function FormViewer({ highlight, activeTerm, showTerms, scrollTarget, onPick, onAskSelection }: Props) {
+  const { ui } = useI18n();
   const wrapRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [doc, setDoc] = useState<PDFDocumentProxy>();
@@ -91,11 +93,11 @@ export default function FormViewer({ highlight, activeTerm, showTerms, scrollTar
   return (
     <div ref={wrapRef} className="relative mx-auto w-full max-w-[920px]" onMouseUp={onMouseUp}>
       {error && (
-        <div className="rounded-xl border border-line bg-surface p-6 text-lg">
-          The form could not load. <a className="text-accent underline" href={FORM.pdf}>Open the PDF instead</a>.
+        <div className="card p-6 text-lg">
+          {ui("formError")} <a className="text-accent underline" href={FORM.pdf}>{ui("openPdf")}</a>
         </div>
       )}
-      {!doc && !error && <PageSkeleton />}
+      {!doc && !error && <PageSkeleton label={ui("loadingForm")} />}
       {doc &&
         width > 0 &&
         Array.from({ length: FORM.pages }, (_, i) => (
@@ -122,20 +124,20 @@ export default function FormViewer({ highlight, activeTerm, showTerms, scrollTar
             setSelection(undefined);
             window.getSelection()?.removeAllRanges();
           }}
-          className="rise absolute z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-ink px-4 py-2.5 text-base font-bold text-white shadow-lg hover:bg-accent-ink"
+          className="btn rise absolute z-20 -translate-x-1/2 whitespace-nowrap bg-sun px-4 py-2.5 text-base"
           style={{ top: Math.max(selection.top, 4), left: selection.left }}
         >
-          Explain what I highlighted
+          {ui("explainSelection")}
         </button>
       )}
     </div>
   );
 }
 
-function PageSkeleton() {
+function PageSkeleton({ label }: { label: string }) {
   return (
-    <div className="aspect-[612/792] w-full animate-pulse rounded-lg bg-surface shadow-sm ring-1 ring-line">
-      <div className="p-10 text-lg text-muted">Loading the form…</div>
+    <div className="aspect-[612/792] w-full animate-pulse rounded-xl border-2 border-ink bg-surface">
+      <div className="p-10 text-lg text-muted">{label}</div>
     </div>
   );
 }
@@ -210,7 +212,7 @@ function PdfPage({ doc, pageNumber, scale, highlight, activeTerm, showTerms, onP
     <div
       ref={ref}
       data-page={pageNumber}
-      className={`relative mb-6 overflow-hidden rounded-lg bg-white shadow-[0_1px_3px_rgb(15_27_45/0.08),0_8px_24px_rgb(15_27_45/0.06)] ring-1 ring-line ${showTerms ? "" : "form-hidden-terms"}`}
+      className={`relative mb-6 overflow-hidden rounded-xl border-2 border-ink bg-white shadow-[0_5px_0_var(--ink)] ${showTerms ? "" : "form-hidden-terms"}`}
       style={{ width: PAGE_W * scale, height: PAGE_H * scale }}
       onMouseMove={(e) => {
         const { x, y } = toPdf(e);

@@ -1,5 +1,5 @@
-import GuideApp from "@/components/GuideApp";
+import Landing from "@/components/Landing";
 
 export default function Home() {
-  return <GuideApp />;
+  return <Landing />;
 }

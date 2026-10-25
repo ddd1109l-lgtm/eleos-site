@@ -13,9 +13,14 @@ export type Field = {
   tip?: string;
   sensitive?: boolean;
   optional?: boolean;
+  doc?: DocSpot;
   condition?: string;
   box: Box;
 };
+
+// Where the answer sits on one of the SAMPLE mock documents.
+export type DocId = "medicare_card" | "award_letter" | "bank_statement";
+export type DocSpot = { id: DocId; spot: string };
 
 export type Section = {
   id: string;
@@ -182,6 +187,7 @@ export const FIELDS: Field[] = [
     label: "First name, Middle initial, Last name",
     plain: "Write your full name the way it is printed on your Medicare card.",
     where: "Your Medicare card",
+    doc: { id: "medicare_card", spot: "name" },
     box: b(1, 14, 380, 498, 413),
   },
   {
@@ -361,6 +367,7 @@ export const FIELDS: Field[] = [
     where: "Your Medicare card, under \"Medicare Number\"",
     tip: "Fill in the second column for your spouse only if you are married.",
     sensitive: true,
+    doc: { id: "medicare_card", spot: "number" },
     box: b(2, 14, 239, 600, 261),
   },
   {
@@ -439,6 +446,7 @@ export const FIELDS: Field[] = [
     section: "s6",
     label: "Does anyone in the home get money from other sources?",
     plain: "Check Yes if anyone in your home gets money that is not from a job. Social Security counts. Most people on Medicare check Yes here.",
+    doc: { id: "award_letter", spot: "before" },
     box: b(2, 14, 548, 600, 568),
   },
   {
@@ -465,6 +473,7 @@ export const FIELDS: Field[] = [
       "The full amount BEFORE anything is taken out. For Social Security, use the amount before your Medicare Part B premium is taken out. That number is bigger than what lands in your bank.",
     where: "Social Security award letter, the benefit amount before deductions",
     condition: "Only if someone gets other money",
+    doc: { id: "award_letter", spot: "before" },
     box: b(2, 14, 652, 600, 687),
   },
   {
@@ -473,6 +482,7 @@ export const FIELDS: Field[] = [
     label: "How often paid? (weekly, biweekly, monthly, etc.)",
     plain: "How often the money comes. Social Security and most pensions are paid monthly.",
     condition: "Only if someone gets other money",
+    doc: { id: "award_letter", spot: "monthly" },
     box: b(2, 14, 687, 600, 723),
   },
 
@@ -512,6 +522,7 @@ export const FIELDS: Field[] = [
     plain: "The phone number of the doctor or clinic.",
     where: "The medical bill",
     condition: "Only if there are medical bills",
+    sensitive: true,
     box: b(3, 14, 142, 600, 161),
   },
   {
@@ -521,6 +532,7 @@ export const FIELDS: Field[] = [
     plain: "The day or days you got the care. This is not the date the bill was mailed.",
     where: "The medical bill, often labeled \"date of service\"",
     condition: "Only if there are medical bills",
+    sensitive: true,
     box: b(3, 14, 161, 600, 180),
   },
   {
@@ -530,6 +542,7 @@ export const FIELDS: Field[] = [
     plain: "The full amount of the bill.",
     where: "The medical bill",
     condition: "Only if there are medical bills",
+    sensitive: true,
     box: b(3, 14, 180, 600, 202),
   },
 
@@ -549,6 +562,8 @@ export const FIELDS: Field[] = [
     label: "Checking accounts",
     plain: "The bank account you use to pay bills and write checks. Write the bank's name and about how much is in it.",
     where: "Your latest bank statement, the ending balance",
+    doc: { id: "bank_statement", spot: "balance" },
+    tip: "Don't write account numbers. The bank's name is enough.",
     box: b(3, 14, 268, 600, 306),
   },
   {
@@ -557,6 +572,8 @@ export const FIELDS: Field[] = [
     label: "Savings accounts",
     plain: "A bank account where you keep money you are saving.",
     where: "Your latest bank statement",
+    doc: { id: "bank_statement", spot: "balance" },
+    tip: "Don't write account numbers. The bank's name is enough.",
     box: b(3, 14, 306, 600, 344),
   },
   {
@@ -878,12 +895,70 @@ export const HELP = {
   answers: { name: "Louisiana Answers", phone: "1-877-340-9100" },
 };
 
-export const DOCUMENTS = [
-  { name: "Medicare card", why: "Your name and Medicare Number (Sections 1 and 4)" },
-  { name: "Social Security award letter", why: "Your monthly benefit before deductions (Section 6)" },
-  { name: "Latest bank statement", why: "Bank name and balance (Section 8)" },
-  { name: "Pension statement or pay stubs", why: "If you have them (Sections 5 and 6)" },
-  { name: "Other insurance card", why: "If you have Medigap or a retiree plan (Section 4)" },
+// Messages from the research packet (section 8), shown to everyone so the app never judges eligibility.
+export const MESSAGES = [
+  "Not sure if you qualify? Apply anyway. Louisiana makes the decision, and it's free.",
+  "Louisiana does not count your savings for these programs.",
+  "You can also apply for Extra Help through Social Security. That starts your Louisiana application too.",
+  "Many people who get QMB also qualify for full Medicaid. A counselor can check for free.",
+];
+
+// Ways to apply and next steps, matching the finish block of Max's form-spec.json.
+export const SUBMIT_WAYS = [
+  { how: "Mail", detail: "Medicaid Application Office, P.O. Box 91278, Baton Rouge, LA 70821-9278" },
+  { how: "Fax", detail: "1-877-523-2987" },
+  { how: "Online", detail: "LDH Medicaid Self-Service Portal: sspweb.lameds.ldh.la.gov/selfservice" },
+  { how: "Phone", detail: "1-888-342-6207, Monday to Friday, 8 a.m. to 4:30 p.m. (TTY 1-800-220-5404)" },
+  { how: "In person", detail: "Any local Medicaid office, Monday to Friday, 8 a.m. to 4:30 p.m." },
+];
+
+export const NEXT_STEPS = [
+  "Keep a copy of your signed application.",
+  "Medicaid will mail you a decision. Watch your mailbox.",
+  "If anything changes, call 1-888-342-6207 within 10 days.",
+  "Many people who get QMB also qualify for full Medicaid. A free counselor can check.",
+];
+
+// Engine fields that share a spot on the page with another question, so they need their own label.
+export const EXTRA_SPEC_LABELS: Record<string, string> = {
+  s2_home_different: "Is your home address different from your mailing address?",
+  s2_home_address: "Home Address (if different)",
+  s4_spouse_medicare_number: "Medicare Claim Number (Your Spouse)",
+  s4_spouse_other_insurance: "Other health insurance (Your Spouse)",
+  s4_medicare_number: "Medicare Claim Number (You)",
+  s4_other_insurance: "Other health insurance (You)",
+  rights_read: "Your Rights and Responsibilities",
+};
+
+export const DOCUMENTS: { name: string; why: string; look: string; doc?: DocId }[] = [
+  {
+    name: "Medicare card",
+    why: "Your name and Medicare Number (Sections 1 and 4)",
+    look: "A red, white, and blue card with your name, your Medicare Number, and when Part A and Part B started.",
+    doc: "medicare_card",
+  },
+  {
+    name: "Social Security award letter",
+    why: "Your monthly benefit before deductions (Section 6)",
+    look: "A letter from Social Security. It shows your full monthly benefit, the Medicare Part B amount taken out, and what you get after that.",
+    doc: "award_letter",
+  },
+  {
+    name: "Latest bank statement",
+    why: "Bank name and balance (Section 8)",
+    look: "Shows the bank's name, whose account it is, the dates it covers, and the ending balance.",
+    doc: "bank_statement",
+  },
+  {
+    name: "Pension statement or pay stubs",
+    why: "If you have them (Sections 5 and 6)",
+    look: "Shows who pays you and how much before taxes.",
+  },
+  {
+    name: "Other insurance card",
+    why: "If you have Medigap or a retiree plan (Section 4)",
+    look: "Any health insurance card besides Medicare.",
+  },
 ];
 
 export const SUGGESTED_QUESTIONS = [

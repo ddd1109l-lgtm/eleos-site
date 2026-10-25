@@ -1,267 +1,354 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import {
-  Check,
-  ChevronDown,
-  Highlighter,
-  LifeBuoy,
-  Phone,
-  X,
-} from "lucide-react";
-import {
-  FIELDS,
-  FORM,
-  HELP,
-  SECTIONS,
-  fieldAt,
-  sectionAt,
-  sectionById,
-  type Box,
-} from "@/data/form";
+import { Check, ChevronDown, ChevronUp, Circle, CircleDot, Highlighter, Lock, Send, Star } from "lucide-react";
+import { EXTRA_SPEC_LABELS, FIELDS, FORM, SECTIONS, fieldAt, sectionAt, sectionById, type Box } from "@/data/form";
+import type { Aid } from "@/contract/spec-types";
+import { useI18n } from "@/i18n/I18nProvider";
 import { lookupTerm } from "@/lib/terms";
-import ExplainCard from "./ExplainCard";
-import Chat from "./Chat";
+import { getPrefs } from "@/lib/prefs";
+import { localFieldFor, localSectionId, shareableProgress, SPEC, specFieldsFor, useProgress, type ProgressReport } from "@/lib/progress";
+import { speak, speakItems, type SpeakItem } from "@/lib/speech";
+import AskFawn from "./AskFawn";
+import ExplainCard, { fieldsIn, type Step } from "./ExplainCard";
+import HelpDialog from "./HelpDialog";
+import TopBar from "./TopBar";
 import type { Pick } from "./FormViewer";
 
 const FormViewer = dynamic(() => import("./FormViewer"), { ssr: false });
 
-type Selected = { fieldId?: string; sectionId?: string; term?: string };
+type Selected = { fieldId?: string; sectionId?: string; term?: string; finish?: boolean };
 
-const SCALES = [1, 1.125, 1.25];
+const BUBBLES = ["bg-coral", "bg-sun", "bg-mint", "bg-sky", "bg-pink", "bg-fawn"];
+
+let counter = 0;
+const nonce = () => ++counter;
 
 export default function GuideApp() {
+  const tr = useI18n();
+  const { ui, lang } = tr;
+  const { progress, engine, answer, markDone, reset } = useProgress();
   const [selected, setSelected] = useState<Selected>({});
-  const [scrollTarget, setScrollTarget] = useState<{
-    box: Box;
-    nonce: number;
-  }>();
-  const [pending, setPending] = useState<{ text: string; nonce: number }>();
-  const [done, setDone] = useState<string[]>([]);
-  const [scaleIdx, setScaleIdx] = useState(0);
+  const [scrollTarget, setScrollTarget] = useState<{ box: Box; nonce: number }>();
+  const [askRequest, setAskRequest] = useState<{ text: string; nonce: number }>();
+  const [aid, setAid] = useState<Aid>();
   const [showTerms, setShowTerms] = useState(true);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [mobileTab, setMobileTab] = useState<"explain" | "ask">("explain");
   const [sheetOpen, setSheetOpen] = useState(false);
-  const isDesktop = useIsDesktop();
-  const [explainOpen, setExplainOpen] = useState(true);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [burst, setBurst] = useState<string>();
 
-  // Progress and text size stay on this device only.
+  // ?demo=finish loads a finished application and jumps straight to Finish.
   useEffect(() => {
-    try {
-      // Read after mount so the server render and first client render match.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDone(JSON.parse(localStorage.getItem("msp-done") ?? "[]"));
-      setScaleIdx(Number(localStorage.getItem("msp-scale") ?? 0) || 0);
-    } catch {}
+    if (new URLSearchParams(window.location.search).get("demo") !== "finish") return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelected({ finish: true });
+    setSheetOpen(true);
   }, []);
-
-  useEffect(() => {
-    document.documentElement.style.setProperty(
-      "--ui-scale",
-      String(SCALES[scaleIdx]),
-    );
-    try {
-      localStorage.setItem("msp-scale", String(scaleIdx));
-    } catch {}
-  }, [scaleIdx]);
-
-  const toggleDone = (id: string) => {
-    setDone((d) => {
-      const next = d.includes(id) ? d.filter((x) => x !== id) : [...d, id];
-      try {
-        localStorage.setItem("msp-done", JSON.stringify(next));
-      } catch {}
-      return next;
-    });
-  };
 
   const field = FIELDS.find((f) => f.id === selected.fieldId);
   const section = sectionById(field?.section ?? selected.sectionId ?? "");
   const term = selected.term ? lookupTerm(selected.term) : undefined;
-  const highlight =
-    field?.box ?? (selected.sectionId ? section?.box : undefined);
+  const highlight = field?.box ?? (selected.sectionId ? section?.box : undefined);
+  const finishOpen = selected.finish && engine.complete;
 
-  const onPick = useCallback((p: Pick) => {
-    const f = fieldAt(p.page, p.x, p.y);
-    const s = sectionAt(p.page, p.x, p.y);
-    setSelected({
-      fieldId: f?.id,
-      sectionId: f ? undefined : s?.id,
-      term: p.term,
-    });
-    // On phones the guide sheet covers the bottom half, so bring the field up top.
-    const box = f?.box ?? s?.box;
-    if (box && !window.matchMedia("(min-width: 1024px)").matches) {
-      setScrollTarget({ box: { ...box, page: box.page || p.page }, nonce: nonce() });
+  const sectionStatus = (localId: string) => engine.sections.find((s) => localSectionId(s.id) === localId)?.status;
+
+  const isDesktop = () => window.matchMedia("(min-width: 1024px)").matches;
+  const scrollTo = (box: Box, page?: number) => setScrollTarget({ box: { ...box, page: box.page || page || 1 }, nonce: nonce() });
+
+  const explainText = useCallback(
+    (fieldId?: string, sectionId?: string, termName?: string) => {
+      const f = FIELDS.find((x) => x.id === fieldId);
+      const s = sectionById(sectionId ?? f?.section ?? "");
+      const t = termName ? lookupTerm(termName) : undefined;
+      return [
+        t && `${tr.term(t, "term")}. ${tr.term(t, "plain")}`,
+        f ? `${tr.field(f, "label")}. ${tr.field(f, "plain")}` : s && `${tr.section(s, "title")}. ${tr.section(s, "plain")}`,
+        f && tr.field(f, "where") && `${ui("whereToFind")}: ${tr.field(f, "where")}`,
+      ]
+        .filter(Boolean)
+        .join(". ");
+    },
+    [tr, ui],
+  );
+
+  const openField = useCallback(
+    (localId: string, speakIt = true) => {
+      const f = FIELDS.find((x) => x.id === localId);
+      if (!f) return;
+      setSelected({ fieldId: f.id });
+      scrollTo(f.box, sectionById(f.section)?.box.page);
+      setSheetOpen(true);
+      if (speakIt && getPrefs().autoRead) speak(explainText(f.id), lang.code, f.label);
+    },
+    [explainText, lang.code],
+  );
+
+  const onPick = useCallback(
+    (p: Pick) => {
+      const f = fieldAt(p.page, p.x, p.y);
+      const s = sectionAt(p.page, p.x, p.y);
+      setSelected({ fieldId: f?.id, sectionId: f ? undefined : s?.id, term: p.term });
+      // On phones the sheet covers the bottom half, so bring the field up top.
+      const box = f?.box ?? s?.box;
+      if (box && !isDesktop()) scrollTo(box, p.page);
+      setSheetOpen(true);
+      if (getPrefs().autoRead) speak(explainText(f?.id, f ? undefined : s?.id, p.term), lang.code, f?.label ?? s?.title);
+    },
+    [explainText, lang.code],
+  );
+
+  // After every button press, the engine decides where to go next.
+  const afterPress = (r: ProgressReport, pressedSection?: string) => {
+    if (pressedSection && r.sections.find((s) => s.id === pressedSection)?.status === "done") {
+      setBurst(localSectionId(pressedSection));
+      setTimeout(() => setBurst(undefined), 800);
     }
-    setMobileTab("explain");
-    setSheetOpen(true);
-    setExplainOpen(true);
-  }, []);
+    if (r.nextFieldId) {
+      const local = localFieldFor(r.nextFieldId);
+      if (local) return openField(local);
+    }
+    if (r.complete) {
+      setSelected({ finish: true });
+      setSheetOpen(true);
+    }
+  };
 
-  const ask = useCallback((text: string) => {
-    setPending({ text, nonce: nonce() });
-    setMobileTab("ask");
-    setSheetOpen(true);
-    setExplainOpen(false);
-  }, []);
+  const onAnswer = (id: string, value: "yes" | "no") => afterPress(answer(id, value), SPEC.fields.find((f) => f.id === id)?.section);
+  const onDone = (id: string) => afterPress(markDone(id), SPEC.fields.find((f) => f.id === id)?.section);
+
+  const steps: Step[] = specFieldsFor(field?.id)
+    .map((f) => ({ field: f, status: engine.statuses[f.id], answer: progress.answers[f.id] }))
+    .filter((s) => s.status !== "hidden");
+
+  const ask = useCallback((text: string) => setAskRequest({ text, nonce: nonce() }), []);
 
   const goToSection = (id: string) => {
     const s = sectionById(id);
     if (!s) return;
     setSelected({ sectionId: id });
-    setScrollTarget({ box: s.box, nonce: nonce() });
+    scrollTo(s.box);
+    setSheetOpen(true);
+    if (getPrefs().autoRead) speak(explainText(undefined, id), lang.code, s.title);
   };
 
-  const currentSectionId = section?.id;
-  const progress = useMemo(
-    () => Math.round((done.length / SECTIONS.length) * 100),
-    [done],
-  );
+  const sectionItems = (id: string): SpeakItem[] => {
+    const s = sectionById(id)!;
+    return [
+      {
+        text: [tr.section(s, "title"), tr.section(s, "plain"), tr.section(s, "skip")].filter(Boolean).join(". "),
+        label: tr.section(s, "title"),
+        onStart: () => {
+          setSelected({ sectionId: id });
+          scrollTo(s.box);
+        },
+      },
+      ...fieldsIn(id).map((f) => ({
+        text: [tr.field(f, "label"), tr.field(f, "plain"), tr.field(f, "where") && `${ui("whereToFind")}: ${tr.field(f, "where")}`].filter(Boolean).join(". "),
+        label: tr.field(f, "label"),
+        onStart: () => {
+          setSelected({ fieldId: f.id });
+          scrollTo(f.box, s.box.page);
+        },
+      })),
+    ];
+  };
+
+  const readSection = (id: string) => speakItems(sectionItems(id), lang.code);
+  const readForm = () => speakItems(SECTIONS.flatMap((s) => sectionItems(s.id)), lang.code);
+
+  const openFinish = () => {
+    if (!engine.complete) return;
+    setSelected({ finish: true });
+    setSheetOpen(true);
+  };
+
+  const specLabel = (id: string) => {
+    if (EXTRA_SPEC_LABELS[id]) return tr.t(`sf.${id}`);
+    const local = FIELDS.find((x) => x.id === localFieldFor(id));
+    return local ? tr.field(local, "label")! : (SPEC.fields.find((f) => f.id === id)?.label ?? id);
+  };
 
   const explain = (
     <ExplainCard
+      steps={steps}
+      onAnswer={onAnswer}
+      onDone={onDone}
+      aid={aid}
+      onCloseAid={() => setAid(undefined)}
+      onStartOver={() => {
+        reset();
+        setSelected({});
+        window.history.replaceState(null, "", "/form");
+      }}
+      onPerson={() => setHelpOpen(true)}
       field={field}
       section={section}
       term={term}
+      finish={finishOpen}
       onAsk={ask}
       onClear={() => setSelected({})}
+      onReadSection={readSection}
+      onReadForm={readForm}
     />
   );
 
+  const stepsList = (
+    <ol className="space-y-1.5">
+      {SECTIONS.map((s, idx) => {
+        const status = sectionStatus(s.id);
+        const active = section?.id === s.id && !finishOpen;
+        const specSectionId = s.id === "start" ? "cover" : s.id;
+        const visible = SPEC.fields.filter((f) => f.section === specSectionId && engine.statuses[f.id] !== "hidden");
+        return (
+          <li key={s.id}>
+            <div className={`relative flex items-center rounded-2xl border-2 ${active ? "border-ink bg-sun-soft shadow-[0_3px_0_var(--ink)]" : "border-transparent hover:bg-bg"}`}>
+              <button
+                type="button"
+                onClick={() => goToSection(s.id)}
+                aria-current={active ? "step" : undefined}
+                className="flex min-w-0 flex-1 items-center gap-3 px-2.5 py-2.5 text-start"
+              >
+                <span
+                  className={`grid size-9 shrink-0 place-items-center rounded-full border-2 border-ink font-display text-[1rem] font-bold ${
+                    status === "done" ? "bg-mint text-white" : status === "skipped" ? "bg-line text-muted" : BUBBLES[idx % BUBBLES.length]
+                  }`}
+                >
+                  {status === "done" ? <Star size={17} fill="currentColor" /> : (s.number ?? (s.id === "start" ? "★" : "✎"))}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className={`block truncate text-[1.02rem] ${active ? "font-bold" : ""} ${status === "skipped" ? "text-muted" : ""}`}>
+                    {tr.section(s, "title")}
+                  </span>
+                  {status === "skipped" && <span className="block text-[0.85rem] font-bold text-muted">{ui("skipped")}</span>}
+                  {status === "in_progress" && <span className="block text-[0.85rem] text-ink-2">{ui("inProgress")}</span>}
+                </span>
+              </button>
+              {burst === s.id && <Confetti />}
+            </div>
+            {active && visible.length > 0 && (
+              <ul className="mb-2 ms-7 mt-1.5 space-y-0.5 border-s-2 border-dashed border-line ps-3">
+                {visible.map((f) => {
+                  const st = engine.statuses[f.id];
+                  const local = localFieldFor(f.id);
+                  const on = local && field?.id === local;
+                  return (
+                    <li key={f.id}>
+                      <button
+                        type="button"
+                        onClick={() => local && openField(local)}
+                        className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-start text-[0.95rem] ${on ? "bg-accent text-white" : "text-ink-2 hover:bg-white"}`}
+                      >
+                        {st === "done" ? (
+                          <Check size={16} strokeWidth={3} className={on ? "" : "text-mint-ink"} aria-label={ui("doneTag")} />
+                        ) : f.kind === "gate" ? (
+                          <CircleDot size={16} aria-hidden />
+                        ) : (
+                          <Circle size={16} aria-hidden />
+                        )}
+                        <span className="truncate">{specLabel(f.id)}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </li>
+        );
+      })}
+      <li>
+        <button
+          type="button"
+          onClick={openFinish}
+          aria-disabled={!engine.complete}
+          title={engine.complete ? undefined : ui("finishLocked")}
+          className={`flex w-full items-center gap-3 rounded-2xl border-2 px-2.5 py-2.5 text-start ${
+            finishOpen ? "border-ink bg-mint-soft shadow-[0_3px_0_var(--ink)]" : engine.complete ? "border-transparent hover:bg-bg" : "cursor-not-allowed border-transparent opacity-60"
+          }`}
+        >
+          <span className="grid size-9 shrink-0 place-items-center rounded-full border-2 border-ink bg-accent text-white">
+            {engine.complete ? <Send size={16} /> : <Lock size={15} />}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-[1.02rem] font-bold">{ui("finishStep")}</span>
+            {!engine.complete && <span className="block text-[0.82rem] leading-snug text-muted">{ui("finishLocked")}</span>}
+          </span>
+        </button>
+      </li>
+    </ol>
+  );
+
+  const pct = engine.requiredTotal ? Math.round((engine.requiredDone / engine.requiredTotal) * 100) : 0;
+
   return (
     <div className="flex h-dvh flex-col">
-      <Header
-        scaleIdx={scaleIdx}
-        setScaleIdx={setScaleIdx}
-        showTerms={showTerms}
-        setShowTerms={setShowTerms}
-        onHelp={() => setHelpOpen(true)}
-      />
+      <TopBar />
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[256px_minmax(0,1fr)_420px]">
-        {/* Section list */}
-        <nav
-          aria-label="Form sections"
-          className="hidden min-h-0 overflow-y-auto border-r border-line bg-surface lg:block"
-        >
-          <div className="px-5 pb-3 pt-5">
-            <p className="text-[0.85rem] font-bold uppercase tracking-wide text-muted">
-              Your progress
-            </p>
-            <div
-              className="mt-2 h-2 overflow-hidden rounded-full bg-bg"
-              aria-hidden
-            >
-              <div
-                className="h-full rounded-full bg-ok transition-all"
-                style={{ width: `${progress}%` }}
-              />
+      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)_410px]">
+        {/* Steps */}
+        <nav aria-label={ui("steps")} className="hidden min-h-0 overflow-y-auto border-e-2 border-ink bg-white lg:block" dir={lang.rtl ? "rtl" : "ltr"}>
+          <div className="px-4 pb-3 pt-5">
+            <p className="font-display text-[1.25rem] font-bold">{ui("progress")}</p>
+            <div className="mt-2 h-4 overflow-hidden rounded-full border-2 border-ink bg-bg" aria-hidden>
+              <div className="h-full rounded-full bg-mint transition-all" style={{ width: `${pct}%` }} />
             </div>
-            <p className="mt-1.5 text-[0.9rem] text-ink-2">
-              {done.length} of {SECTIONS.length} sections done
-            </p>
+            <p className="mt-1.5 text-[0.95rem] text-ink-2">{ui("sectionsDone", { done: engine.requiredDone, total: engine.requiredTotal })}</p>
           </div>
-          <ol className="space-y-0.5 px-2.5 pb-6">
-            {SECTIONS.map((s) => {
-              const isDone = done.includes(s.id);
-              const active = currentSectionId === s.id;
-              return (
-                <li
-                  key={s.id}
-                  className={`group flex items-center rounded-xl ${active ? "bg-accent-soft" : "hover:bg-bg"}`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => goToSection(s.id)}
-                    aria-current={active ? "step" : undefined}
-                    className="flex min-w-0 flex-1 items-center gap-3 px-2.5 py-2.5 text-left"
-                  >
-                    <span
-                      className={`grid size-8 shrink-0 place-items-center rounded-full text-[0.9rem] font-bold ${
-                        isDone
-                          ? "bg-ok text-white"
-                          : active
-                            ? "bg-accent text-white"
-                            : "bg-bg text-ink-2"
-                      }`}
-                    >
-                      {isDone ? (
-                        <Check size={17} strokeWidth={3} />
-                      ) : (
-                        (s.number ?? "•")
-                      )}
-                    </span>
-                    <span
-                      className={`truncate text-[1rem] ${active ? "font-bold text-accent-ink" : "text-ink"}`}
-                    >
-                      {s.title}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => toggleDone(s.id)}
-                    aria-label={
-                      isDone
-                        ? `Mark ${s.title} as not done`
-                        : `Mark ${s.title} as done`
-                    }
-                    aria-pressed={isDone}
-                    className={`mr-1.5 grid size-8 shrink-0 place-items-center rounded-lg border ${
-                      isDone
-                        ? "border-ok bg-ok-soft text-ok"
-                        : "border-line text-transparent hover:text-muted group-hover:border-muted/50"
-                    }`}
-                  >
-                    <Check size={16} strokeWidth={3} />
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
+          <div className="px-2.5 pb-8">{stepsList}</div>
         </nav>
 
         {/* Form */}
-        <main data-scroller className="min-h-0 overflow-y-auto pb-40 lg:pb-10">
-          <div className="sticky top-0 z-10 border-b border-line bg-bg/90 px-4 py-2.5 backdrop-blur lg:hidden">
-            <div className="flex gap-2 overflow-x-auto">
-              {SECTIONS.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => goToSection(s.id)}
-                  className={`shrink-0 rounded-full border px-3.5 py-1.5 text-[0.95rem] ${
-                    currentSectionId === s.id
-                      ? "border-accent bg-accent text-white"
-                      : "border-line bg-surface text-ink"
-                  }`}
-                >
-                  {s.number ? `${s.number}. ` : ""}
-                  {s.short}
+        <main data-scroller className="min-h-0 overflow-y-auto pb-56 lg:pb-12">
+          <div className="sticky top-0 z-10 border-b-2 border-ink bg-white/95 px-3 py-2.5 backdrop-blur lg:hidden">
+            <div className="flex gap-2 overflow-x-auto pb-0.5">
+              {SECTIONS.map((s, idx) => {
+                const status = sectionStatus(s.id);
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => goToSection(s.id)}
+                    className={`flex shrink-0 items-center gap-1.5 rounded-full border-2 border-ink px-3 py-1.5 text-[0.95rem] font-bold ${
+                      section?.id === s.id ? "bg-ink text-white" : status === "skipped" ? "bg-line text-muted" : "bg-white"
+                    }`}
+                  >
+                    <span className={`size-2.5 rounded-full ${status === "done" ? "bg-mint" : BUBBLES[idx % BUBBLES.length]}`} aria-hidden />
+                    {s.number ? `${s.number}. ` : ""}
+                    {tr.section(s, "short")}
+                    {status === "skipped" && ` · ${ui("skipped")}`}
+                  </button>
+                );
+              })}
+              {engine.complete && (
+                <button type="button" onClick={openFinish} className="flex shrink-0 items-center gap-1.5 rounded-full border-2 border-ink bg-accent px-3 py-1.5 text-[0.95rem] font-bold text-white">
+                  <Send size={14} /> {ui("finishStep")}
                 </button>
-              ))}
+              )}
+            </div>
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full border-2 border-ink bg-bg" aria-hidden>
+              <div className="h-full bg-mint transition-all" style={{ width: `${pct}%` }} />
             </div>
           </div>
-          <div className="px-4 pt-5 lg:px-8 lg:pt-7">
+          <div className="px-3 pt-5 sm:px-5 lg:px-8 lg:pt-7">
             <div className="mx-auto mb-5 flex max-w-[920px] flex-wrap items-end justify-between gap-3">
               <div>
-                <h1 className="text-[1.6rem] font-bold leading-tight lg:text-[1.85rem]">
-                  {FORM.name}
-                </h1>
-                <p className="mt-1 text-[1rem] text-muted">
-                  {FORM.code} · Louisiana Department of Health ·{" "}
-                  <a
-                    href={FORM.pdf}
-                    className="text-accent underline underline-offset-2"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Print the form
+                <h1 className="font-display text-[1.7rem] font-bold leading-tight text-accent-ink lg:text-[2rem]">{tr.t("form.name")}</h1>
+                <p className="mt-1 text-[1rem] text-ink-2">
+                  {FORM.code} · {ui("formBy")} ·{" "}
+                  <a href={FORM.pdf} className="font-bold text-accent underline underline-offset-2" target="_blank" rel="noreferrer">
+                    {ui("printForm")}
                   </a>
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowTerms(!showTerms)}
+                aria-pressed={showTerms}
+                className={`btn h-11 px-3 text-[0.95rem] ${showTerms ? "bg-mark" : "bg-white"}`}
+              >
+                <Highlighter size={18} aria-hidden /> {ui("highlights")}
+              </button>
             </div>
             <FormViewer
               highlight={highlight}
@@ -269,114 +356,63 @@ export default function GuideApp() {
               showTerms={showTerms}
               scrollTarget={scrollTarget}
               onPick={onPick}
-              onAskSelection={(text) =>
-                ask(`What does this part of the form mean: "${text}"`)
-              }
+              onAskSelection={(text) => ask(`What does this part of the form mean: "${text}"`)}
             />
           </div>
         </main>
 
-        {/* Guide panel (desktop) */}
-        {isDesktop && (
-          <aside
-            aria-label="Guide"
-            className="hidden min-h-0 flex-col border-l border-line bg-surface lg:flex"
-          >
-            {explainOpen ? (
-              <div className="max-h-[55%] shrink-0 overflow-y-auto border-b border-line px-5 py-5">
-                {explain}
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setExplainOpen(true)}
-                className="flex shrink-0 items-center gap-3 border-b border-line px-5 py-3.5 text-left hover:bg-bg"
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[0.8rem] font-bold uppercase tracking-wide text-muted">
-                    {field || section || term ? "Looking at" : "Tip"}
-                  </span>
-                  <span className="block truncate text-[1.02rem] font-bold">
-                    {field?.label ?? term?.term ?? section?.title ?? "Tap anything on the form to see what it means"}
-                  </span>
-                </span>
-                <ChevronDown size={20} className="shrink-0 text-muted" aria-hidden />
-                <span className="sr-only">Show explanation</span>
-              </button>
-            )}
-            <h2 className="px-5 pt-4 text-[1.15rem] font-bold">Ask a question</h2>
-            <Chat fieldId={field?.id} pending={pending} />
-          </aside>
-        )}
+        {/* Explanation (desktop) */}
+        <aside aria-label={ui("whatItAsks")} className="hidden min-h-0 overflow-y-auto border-s-2 border-ink bg-white px-5 pb-40 pt-5 lg:block">
+          {explain}
+        </aside>
       </div>
 
-      {/* Guide panel (mobile bottom sheet) */}
-      {!isDesktop && (
-        <section
-          aria-label="Guide"
-          className={`fixed inset-x-0 bottom-0 z-30 flex flex-col rounded-t-3xl border-t border-line bg-surface shadow-[0_-8px_30px_rgb(15_27_45/0.12)] transition-[height] lg:hidden ${
-            sheetOpen ? "h-[62dvh]" : "h-[132px]"
-          }`}
-        >
-          <button
-            type="button"
-            onClick={() => setSheetOpen((o) => !o)}
-            className="flex w-full items-center justify-center pt-2"
-            aria-label={sheetOpen ? "Shrink the guide" : "Expand the guide"}
-            aria-expanded={sheetOpen}
-          >
-            <span className="h-1.5 w-12 rounded-full bg-line" />
-          </button>
-          <div className="flex gap-1 px-4 pt-2" role="tablist">
-            {(["explain", "ask"] as const).map((t) => (
-              <button
-                key={t}
-                role="tab"
-                aria-selected={mobileTab === t}
-                onClick={() => {
-                  setMobileTab(t);
-                  setSheetOpen(true);
-                }}
-                className={`flex-1 rounded-xl py-2.5 text-[1.02rem] font-bold ${mobileTab === t ? "bg-ink text-white" : "bg-bg text-ink-2"}`}
-              >
-                {t === "explain" ? "What it means" : "Ask a question"}
-              </button>
-            ))}
-            {sheetOpen && (
-              <button
-                type="button"
-                onClick={() => setSheetOpen(false)}
-                aria-label="Shrink the guide"
-                className="grid size-11 place-items-center rounded-xl text-muted"
-              >
-                <ChevronDown size={22} />
-              </button>
-            )}
-          </div>
-          <div
-            className={`min-h-0 flex-1 flex-col ${sheetOpen ? "flex" : "hidden"}`}
-          >
-            {mobileTab === "explain" ? (
-              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-                {explain}
-              </div>
-            ) : (
-              <Chat fieldId={field?.id} pending={pending} />
-            )}
-          </div>
-        </section>
-      )}
+      {/* Explanation (phones): bottom sheet */}
+      <section
+        aria-label={ui("whatItAsks")}
+        className={`fixed inset-x-0 bottom-0 z-30 flex flex-col rounded-t-[28px] border-t-2 border-ink bg-white shadow-[0_-6px_0_rgb(30_27_58/0.08)] transition-[height] lg:hidden ${
+          sheetOpen ? "h-[60dvh]" : "h-[92px]"
+        }`}
+      >
+        <button type="button" onClick={() => setSheetOpen((o) => !o)} className="flex w-full shrink-0 items-center gap-3 px-5 pb-2 pt-2.5 text-start" aria-expanded={sheetOpen}>
+          <span className="min-w-0 flex-1">
+            <span className="mx-auto mb-2 block h-1.5 w-12 rounded-full bg-line" aria-hidden />
+            <span className="block truncate pe-20 font-display text-[1.15rem] font-bold">
+              {finishOpen ? ui("finishStep") : field ? tr.field(field, "label") : term ? tr.term(term, "term") : section ? tr.section(section, "title") : ui("tapAnything")}
+            </span>
+          </span>
+          {sheetOpen ? <ChevronDown size={22} aria-label={ui("shrinkGuide")} /> : <ChevronUp size={22} aria-label={ui("expandGuide")} />}
+        </button>
+        {sheetOpen && <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-1">{explain}</div>}
+      </section>
 
+      <MobileAwareFawn
+        fieldId={specFieldsFor(field?.id)[0]?.id}
+        localFieldId={field?.id}
+        progress={shareableProgress(progress)}
+        request={askRequest}
+        sheetOpen={sheetOpen}
+        onAid={(a) => {
+          setAid(a);
+          setSheetOpen(true);
+        }}
+      />
       {helpOpen && <HelpDialog onClose={() => setHelpOpen(false)} />}
     </div>
   );
 }
 
-let counter = 0;
-const nonce = () => ++counter;
+type FawnProps = {
+  fieldId?: string;
+  localFieldId?: string;
+  progress: ReturnType<typeof shareableProgress>;
+  request?: { text: string; nonce: number };
+  sheetOpen: boolean;
+  onAid: (aid: Aid) => void;
+};
 
-// Only one chat is mounted at a time, so a question is never sent twice.
-function useIsDesktop() {
+// On phones Dr. Fawn sits just above the bottom sheet; on desktop he sits in the corner.
+function MobileAwareFawn({ sheetOpen, ...rest }: FawnProps) {
   const [desktop, setDesktop] = useState(true);
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
@@ -385,196 +421,25 @@ function useIsDesktop() {
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
-  return desktop;
+  const bottom = desktop ? "1.25rem" : sheetOpen ? "calc(60dvh + 0.5rem)" : "calc(92px + 0.5rem)";
+  return <AskFawn {...rest} bottom={bottom} />;
 }
 
-function Header({
-  scaleIdx,
-  setScaleIdx,
-  showTerms,
-  setShowTerms,
-  onHelp,
-}: {
-  scaleIdx: number;
-  setScaleIdx: (n: number) => void;
-  showTerms: boolean;
-  setShowTerms: (b: boolean) => void;
-  onHelp: () => void;
-}) {
+function Confetti() {
+  const colors = ["var(--coral)", "var(--sun)", "var(--mint)", "var(--sky)", "var(--pink)", "var(--accent)"];
   return (
-    <header className="flex h-16 shrink-0 items-center gap-3 border-b border-line bg-surface px-4 lg:px-6">
-      <div className="flex min-w-0 items-center gap-2.5">
-        <Logo />
-        <div className="min-w-0 leading-tight">
-          <p className="hidden truncate text-[1.1rem] font-bold min-[440px]:block">
-            Medicare Savings Guide
-          </p>
-          <p className="hidden truncate text-[0.85rem] text-muted sm:block">
-            Plain-language help for Louisiana&apos;s application
-          </p>
-        </div>
-      </div>
-      <div className="ml-auto flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setShowTerms(!showTerms)}
-          aria-pressed={showTerms}
-          className={`hidden h-10 items-center gap-2 rounded-xl border px-3 text-[0.95rem] font-bold md:inline-flex ${
-            showTerms
-              ? "border-mark-line/50 bg-mark text-[#5c4100]"
-              : "border-line text-ink-2 hover:bg-bg"
-          }`}
-        >
-          <Highlighter size={18} aria-hidden /> Highlights{" "}
-          {showTerms ? "on" : "off"}
-        </button>
-        <div
-          className="flex h-10 items-center rounded-xl border border-line"
-          role="group"
-          aria-label="Text size"
-        >
-          {SCALES.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setScaleIdx(i)}
-              aria-pressed={scaleIdx === i}
-              aria-label={["Normal text", "Large text", "Largest text"][i]}
-              className={`grid h-full w-10 place-items-center font-bold first:rounded-l-xl last:rounded-r-xl ${
-                scaleIdx === i ? "bg-ink text-white" : "text-ink-2 hover:bg-bg"
-              }`}
-              style={{ fontSize: `${14 + i * 3}px` }}
-            >
-              A
-            </button>
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={onHelp}
-          className="inline-flex h-10 items-center gap-2 rounded-xl bg-accent px-3.5 text-[0.98rem] font-bold text-white hover:bg-accent-ink"
-        >
-          <LifeBuoy size={19} aria-hidden />
-          <span className="hidden sm:inline">Talk to a person</span>
-          <span className="sm:hidden">Help</span>
-        </button>
-      </div>
-    </header>
-  );
-}
-
-function Logo() {
-  return (
-    <svg
-      width="36"
-      height="36"
-      viewBox="0 0 36 36"
-      aria-hidden
-      className="shrink-0"
-    >
-      <rect width="36" height="36" rx="10" fill="var(--accent)" />
-      <rect x="10" y="8" width="16" height="20" rx="2.5" fill="#fff" />
-      <rect
-        x="13"
-        y="13"
-        width="10"
-        height="2.2"
-        rx="1.1"
-        fill="var(--mark-line)"
-      />
-      <rect x="13" y="17.5" width="8" height="2" rx="1" fill="#c9d4ee" />
-      <rect x="13" y="21.5" width="6" height="2" rx="1" fill="#c9d4ee" />
-    </svg>
-  );
-}
-
-function HelpDialog({ onClose }: { onClose: () => void }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  const lines = [
-    {
-      title: HELP.laship.name,
-      detail:
-        "Free, private, one-on-one help from a trained counselor. They can also check if you might get full Medicaid.",
-      phone: HELP.laship.phone,
-      link: HELP.laship.url,
-    },
-    {
-      title: "Questions about this form",
-      detail: `${HELP.medicaid.name} · ${HELP.medicaid.hours} · TTY ${HELP.medicaid.tty}`,
-      phone: HELP.medicaid.phone,
-    },
-    {
-      title: HELP.answers.name,
-      detail:
-        "Louisiana's aging and disability resource center. You can also apply through them.",
-      phone: HELP.answers.phone,
-    },
-  ];
-
-  return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4"
-      onClick={onClose}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="help-title"
-        className="rise w-full max-w-lg rounded-3xl bg-surface p-6 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 id="help-title" className="text-[1.5rem] font-bold">
-              Talk to a real person
-            </h2>
-            <p className="mt-1 text-[1.05rem] text-ink-2">
-              These calls are free. You can ask a family member to join you.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="grid size-10 place-items-center rounded-xl text-muted hover:bg-bg"
-          >
-            <X size={22} />
-          </button>
-        </div>
-        <ul className="mt-5 space-y-3">
-          {lines.map((l) => (
-            <li key={l.title} className="rounded-2xl border border-line p-4">
-              <p className="text-[1.1rem] font-bold">{l.title}</p>
-              <p className="mt-1 text-[1rem] leading-relaxed text-ink-2">
-                {l.detail}
-              </p>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <a
-                  href={`tel:${l.phone.replace(/[^\d]/g, "")}`}
-                  className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-[1.05rem] font-bold text-white hover:bg-accent-ink"
-                >
-                  <Phone size={18} aria-hidden /> {l.phone}
-                </a>
-                {l.link && (
-                  <a
-                    href={l.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[1rem] text-accent underline underline-offset-2"
-                  >
-                    Visit website
-                  </a>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    <span aria-hidden className="pointer-events-none absolute right-6 top-1/2">
+      {Array.from({ length: 14 }, (_, i) => {
+        const angle = (i / 14) * Math.PI * 2;
+        const dist = 30 + (i % 3) * 14;
+        return (
+          <span
+            key={i}
+            className="confetti"
+            style={{ background: colors[i % colors.length], "--dx": `${Math.cos(angle) * dist}px`, "--dy": `${Math.sin(angle) * dist}px` } as React.CSSProperties}
+          />
+        );
+      })}
+    </span>
   );
 }

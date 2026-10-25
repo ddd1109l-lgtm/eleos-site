@@ -1,0 +1,31 @@
+{
+  "reply": "[mock] The full amount before anything is taken out. For Social Security, use the amount before Medicare is taken out. That is the bigger number on your award letter, not what lands in your bank.",
+  "actions": [
+    {
+      "type": "show_aid",
+      "aidId": "doc.award_letter.before_deductions",
+      "aid": {
+        "id": "doc.award_letter.before_deductions",
+        "image": "docs/sample_award_letter.png",
+        "box": {
+          "x": 10,
+          "y": 38,
+          "w": 80,
+          "h": 6
+        },
+        "caption": "Benefit before deductions",
+        "spoken": "On your award letter, the line for your full monthly benefit before deductions, about a third of the way down.",
+        "placeholder": true
+      }
+    }
+  ],
+  "privacy": {
+    "masked": false,
+    "kinds": [],
+    "notice": null
+  },
+  "userMessage": "Where do I find this?",
+  "fieldId": "s6_gross_amount",
+  "degraded": false,
+  "rejected": []
+}

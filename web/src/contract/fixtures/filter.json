@@ -1,0 +1,8 @@
+{
+  "text": "my medicare number is [Medicare number removed]",
+  "masked": true,
+  "kinds": [
+    "mbi"
+  ],
+  "notice": "You don't need to tell me your Medicare number. Write it straight onto the paper form. I removed it from this chat."
+}

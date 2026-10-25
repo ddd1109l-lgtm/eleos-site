@@ -1,0 +1,15 @@
+{
+  "reply": "Please write that number on the paper form. You never need to share it with me.",
+  "actions": [],
+  "privacy": {
+    "masked": true,
+    "kinds": [
+      "ssn"
+    ],
+    "notice": "You don't need to tell me your Social Security number. Write it straight onto the paper form. I removed it from this chat."
+  },
+  "userMessage": "it's [SSN removed]",
+  "fieldId": "s1_ssn",
+  "degraded": false,
+  "rejected": []
+}

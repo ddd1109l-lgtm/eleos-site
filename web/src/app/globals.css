@@ -1,22 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f4f6f8;
+  --bg: #fff7ec;
+  --dots: #f3e3cc;
   --surface: #ffffff;
-  --ink: #0f1b2d;
-  --ink-2: #33415a;
-  --muted: #5d6b82;
-  --line: #dfe4ec;
-  --accent: #1a4fd6;
-  --accent-ink: #123a9e;
-  --accent-soft: #eaf0ff;
+  --ink: #1e1b3a;
+  --ink-2: #45406b;
+  --muted: #6e6990;
+  --line: #ecdfcc;
+  --accent: #2f3fd8;
+  --accent-ink: #000080;
+  --accent-soft: #e9ecff;
+  --brown: #8b4513;
+  --fawn: #d98b4f;
+  --fawn-soft: #fcebdc;
+  --coral: #ff6b57;
+  --coral-soft: #ffe7e1;
+  --sun: #ffc93c;
+  --sun-soft: #fff3c9;
+  --mint: #1fb58f;
+  --mint-ink: #0b7a5e;
+  --mint-soft: #dcf7ee;
+  --sky: #3db7f5;
+  --sky-soft: #e2f4fe;
+  --pink: #ff7ac6;
   --mark: #fff1b8;
   --mark-line: #e0a400;
-  --mark-strong: #ffe27a;
-  --private: #b42318;
-  --private-soft: #fdf0ef;
-  --ok: #12773d;
-  --ok-soft: #e8f6ee;
+  --private: #b8321c;
+  --private-soft: #ffece7;
   --ui-scale: 1;
 }
 
@@ -30,13 +41,25 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-brown: var(--brown);
+  --color-fawn: var(--fawn);
+  --color-fawn-soft: var(--fawn-soft);
+  --color-coral: var(--coral);
+  --color-coral-soft: var(--coral-soft);
+  --color-sun: var(--sun);
+  --color-sun-soft: var(--sun-soft);
+  --color-mint: var(--mint);
+  --color-mint-ink: var(--mint-ink);
+  --color-mint-soft: var(--mint-soft);
+  --color-sky: var(--sky);
+  --color-sky-soft: var(--sky-soft);
+  --color-pink: var(--pink);
   --color-mark: var(--mark);
   --color-mark-line: var(--mark-line);
   --color-private: var(--private);
   --color-private-soft: var(--private-soft);
-  --color-ok: var(--ok);
-  --color-ok-soft: var(--ok-soft);
   --font-sans: var(--font-atkinson), system-ui, sans-serif;
+  --font-display: var(--font-fredoka), var(--font-atkinson), system-ui, sans-serif;
 }
 
 html {
@@ -44,7 +67,9 @@ html {
 }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dots) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
   color: var(--ink);
   font-family: var(--font-sans);
 }
@@ -52,6 +77,40 @@ body {
 :focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* Chunky "sticker" buttons and cards */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  font-weight: 700;
+  box-shadow: 0 3px 0 var(--ink);
+  transition:
+    transform 90ms ease,
+    box-shadow 90ms ease,
+    background-color 120ms;
+}
+
+.btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  transform: none;
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.card {
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 0 4px 0 var(--ink);
 }
 
 /* Form page text layer (pdf.js). Text stays transparent over the rendered canvas;
@@ -89,7 +148,7 @@ body {
 }
 
 .textLayer ::selection {
-  background: rgb(26 79 214 / 0.3);
+  background: rgb(47 63 216 / 0.3);
 }
 
 .textLayer br {
@@ -97,24 +156,24 @@ body {
 }
 
 .textLayer .w {
-  border-radius: 0.12em;
+  border-radius: 0.15em;
   transition: background-color 120ms;
 }
 
 .textLayer .w:hover {
-  background: rgb(26 79 214 / 0.14);
+  background: rgb(47 63 216 / 0.16);
 }
 
 .textLayer .t {
-  background: rgb(255 214 64 / 0.32);
-  box-shadow: inset 0 -0.12em 0 var(--mark-line);
-  border-radius: 0.12em;
+  background: rgb(255 201 60 / 0.38);
+  box-shadow: inset 0 -0.14em 0 var(--mark-line);
+  border-radius: 0.15em;
   transition: background-color 120ms;
 }
 
 .textLayer .t:hover,
 .textLayer .t.on {
-  background: rgb(255 200 30 / 0.6);
+  background: rgb(255 190 20 / 0.7);
 }
 
 .form-hidden-terms .textLayer .t {
@@ -124,12 +183,12 @@ body {
 
 @keyframes spot-in {
   0% {
-    outline-offset: 10px;
-    outline-color: rgb(26 79 214 / 0);
+    outline-offset: 12px;
+    outline-color: rgb(47 63 216 / 0);
   }
   100% {
     outline-offset: 3px;
-    outline-color: rgb(26 79 214 / 1);
+    outline-color: rgb(47 63 216 / 1);
   }
 }
 
@@ -137,27 +196,27 @@ body {
   position: absolute;
   z-index: 1;
   pointer-events: none;
-  border-radius: 6px;
+  border-radius: 8px;
   outline: 3px solid var(--accent);
   outline-offset: 3px;
-  background: rgb(26 79 214 / 0.06);
-  box-shadow: 0 0 0 9999px rgb(15 27 45 / 0.14);
-  animation: spot-in 260ms ease-out;
+  background: rgb(47 63 216 / 0.07);
+  box-shadow: 0 0 0 9999px rgb(30 27 58 / 0.14);
+  animation: spot-in 280ms cubic-bezier(0.3, 1.4, 0.5, 1);
 }
 
 .hoverbox {
   position: absolute;
   z-index: 1;
   pointer-events: none;
-  border-radius: 6px;
-  outline: 2px dashed rgb(26 79 214 / 0.45);
+  border-radius: 8px;
+  outline: 2px dashed rgb(47 63 216 / 0.5);
   outline-offset: 3px;
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px) scale(0.98);
   }
   to {
     opacity: 1;
@@ -166,7 +225,23 @@ body {
 }
 
 .rise {
-  animation: rise 220ms ease-out;
+  animation: rise 260ms cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pop {
+  animation: pop 300ms cubic-bezier(0.3, 1.4, 0.5, 1);
+  transform-origin: bottom right;
 }
 
 @keyframes blink {
@@ -184,10 +259,100 @@ body {
   animation: blink 1.2s infinite both;
 }
 
+@keyframes doc-pulse {
+  0%,
+  100% {
+    outline-color: rgb(47 63 216 / 1);
+  }
+  50% {
+    outline-color: rgb(47 63 216 / 0.25);
+  }
+}
+
+.aid-box {
+  outline: 3px solid var(--accent);
+  box-shadow: 0 0 0 9999px rgb(30 27 58 / 0.35);
+  animation: doc-pulse 2s ease infinite;
+}
+
+.doc-spot {
+  animation: doc-pulse 1.4s ease-in-out infinite;
+}
+
+/* Dr. Fawn avatar */
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.bob {
+  animation: bob 2.8s ease-in-out infinite;
+}
+
+@keyframes talk {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.talk-bar {
+  transform-origin: bottom;
+  animation: talk 0.5s ease-in-out infinite;
+}
+
+@keyframes confetti {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) rotate(260deg);
+  }
+}
+
+.confetti {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  animation: confetti 700ms ease-out forwards;
+}
+
+@keyframes reading-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgb(47 63 216 / 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 16px rgb(47 63 216 / 0);
+  }
+}
+
+.reading-ring {
+  animation: reading-ring 1.2s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .spotlight,
   .rise,
-  .dot {
-    animation: none;
+  .pop,
+  .dot,
+  .bob,
+  .talk-bar,
+  .doc-spot,
+  .aid-box,
+  .confetti,
+  .reading-ring {
+    animation: none !important;
   }
 }

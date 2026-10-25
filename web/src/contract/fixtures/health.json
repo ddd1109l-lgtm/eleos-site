@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "provider": "mock",
+  "model": "mock",
+  "stt": "whisper-large-v3-turbo",
+  "mock": true
+}
