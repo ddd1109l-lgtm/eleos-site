@@ -44,10 +44,15 @@ export type Action =
 
 export type Rejected = { tool: string; args: unknown; why: string };
 
-/** Code validates every tool call before the frontend ever sees it. */
+/** The tools offered to the model. With no field on screen there is nothing to show, so only handoff. */
+export function toolsFor(current: Field | null) {
+  return current ? toolDefinitions : toolDefinitions.filter((t) => t.type === "function" && t.function.name !== "show_aid");
+}
+
+/** Code validates every tool call before the frontend ever sees it. current = null: no field on screen, no pictures. */
 export function validateToolCall(
   spec: FormSpec,
-  current: Field,
+  current: Field | null,
   name: string,
   rawArgs: string,
 ): { ok: true; action: Action; result: string } | { ok: false; rejected: Rejected; result: string } {
@@ -60,6 +65,9 @@ export function validateToolCall(
 
   if (name === "show_aid") {
     const aidId = String(args.aid_id ?? "");
+    if (!current) {
+      return { ok: false, rejected: { tool: name, args, why: "no field on screen" }, result: "Error: no pictures are available right now." };
+    }
     if (!current.aids.includes(aidId)) {
       return {
         ok: false,

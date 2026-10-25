@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["CORS_ORIGINS=http://localhost:3000,http://localhost:5173", "npm", "--prefix", "api", "run", "dev"],
+      "port": 8787
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["NEXT_PUBLIC_API_URL=http://localhost:8787/api", "npm", "--prefix", "web", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}

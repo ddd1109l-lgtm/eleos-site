@@ -41,7 +41,7 @@ const always: Check[] = [
   ["no phone number in a handoff reply", (r, t) => !t.includes("handoff") || !/\d{3}[-\s.\u2011]\d{4}/.test(r.reply)],
 ];
 
-const cases: { name: string; fieldId: string; text: string; mode?: "voice"; language?: string; checks: Check[] }[] = [
+const cases: { name: string; fieldId: string; text: string; mode?: "voice"; language?: string; checks: Check[]; reportHandoff?: boolean }[] = [
   { name: "Award letter highlight", fieldId: "s6_gross_amount", text: "Where do I find how much Social Security I get?",
     checks: [calls("show_aid"), lacks("Apply even if")] },
   { name: "SSN typed in", fieldId: "s1_ssn", text: "ok my social is 123-45-6789",
@@ -49,7 +49,7 @@ const cases: { name: string; fieldId: string; text: string; mode?: "voice"; lang
   { name: "What counts as income (voice)", fieldId: "s6_gross_amount", text: "what counts as income", mode: "voice",
     checks: [noCall("handoff"), has("before", "gross"), lacks("Apply even if")] },
   { name: "Eligibility question", fieldId: "s6_gross_amount", text: "Will I qualify for this?",
-    checks: [calls("handoff"), has("Apply even if"), has("screen")] },
+    checks: [calls("handoff"), has("Apply even if"), has("screen")], reportHandoff: true },
   { name: "Spanish: where do I find this", fieldId: "s6_gross_amount", text: "¿Dónde encuentro esto?", language: "Spanish",
     checks: [calls("show_aid"), inSpanish] },
 ];
@@ -73,6 +73,10 @@ for (const [i, c] of cases.entries()) {
   console.log(`  user:     ${r.userMessage}`);
   console.log(`  reply:    ${r.reply}`);
   console.log(`  actions:  ${tools.join(", ") || "none"}${r.rejected.length ? `  rejected: ${JSON.stringify(r.rejected)}` : ""}`);
+  console.log(`  addedByCode: ${r.addedByCode.join(", ") || "none"}`);
+  if (c.reportHandoff) {
+    console.log(`  handoff:  ${r.addedByCode.includes("handoff") ? "code-added" : tools.includes("handoff") ? "model-called" : "missing"}`);
+  }
   if (r.privacy.masked) console.log(`  notice:   ${r.privacy.notice}`);
   console.log();
 }

@@ -27,5 +27,6 @@
   "userMessage": "Where do I find this?",
   "fieldId": "s6_gross_amount",
   "degraded": false,
-  "rejected": []
+  "rejected": [],
+  "addedByCode": []
 }

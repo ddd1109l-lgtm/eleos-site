@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { formSpec } from "../src/spec/form-1mb.js";
-import { describeError, reconcileHelpClaim, reconcilePictureClaim, recoverTextToolCalls } from "../src/chat/handler.js";
+import { cleanInternalIds, describeError, reconcileHelpClaim, reconcilePictureClaim, recoverTextToolCalls } from "../src/chat/handler.js";
+import { DOCUMENT_NAMES } from "../src/chat/localize.js";
 
 const field = (id: string) => formSpec.fields.find((f) => f.id === id)!;
 const ssn = field("s1_ssn");
@@ -121,5 +122,36 @@ describe("free-help claims without a handoff", () => {
     const real = reconcileHelpClaim(formSpec, gross, "Free help is now on the screen.", []);
     expect(reconcileHelpClaim(formSpec, gross, "Free help is now on the screen.", real)).toBe(real);
     expect(reconcileHelpClaim(formSpec, gross, "The picture on the screen will help you find it.", [])).toEqual([]);
+  });
+});
+
+describe("internal ids in replies", () => {
+  it("drops a parenthesised document id after the model's own name for it (Spanish)", () => {
+    expect(cleanInternalIds(formSpec, "Busque en su carta de beneficio del Seguro Social (ss_award_letter) el número más grande.", "es"))
+      .toBe("Busque en su carta de beneficio del Seguro Social el número más grande.");
+  });
+
+  it("turns a bare document id into its name in the reply language, or English otherwise", () => {
+    expect(cleanInternalIds(formSpec, "Mire su ss_award_letter.", "es")).toBe("Mire su carta de beneficios del Seguro Social.");
+    expect(cleanInternalIds(formSpec, "Gade **medicare_card** ou.", "ht")).toBe("Gade **kat Medicare** ou.");
+    expect(cleanInternalIds(formSpec, "Look at your `pension_statement`.", "en")).toBe("Look at your Pension statement.");
+  });
+
+  it("removes field, aid and fact ids, with their brackets", () => {
+    expect(cleanInternalIds(formSpec, "Write it in the box (s6_gross_amount). The picture (form.s1_ssn) shows where.", "en"))
+      .toBe("Write it in the box. The picture shows where.");
+    expect(cleanInternalIds(formSpec, "Savings don't count (savings_not_counted), see doc.award_letter.before_deductions too.", "en"))
+      .toBe("Savings don't count, see too.");
+  });
+
+  it("leaves ordinary text alone, including words like gross and form", () => {
+    const s = "Use the gross amount on the form. Medicare card, award letter, pension statement.";
+    expect(cleanInternalIds(formSpec, s, "en")).toBe(s);
+  });
+
+  it("has a name in every built-in language for every document", () => {
+    for (const d of formSpec.documents) {
+      expect(Object.keys(DOCUMENT_NAMES[d.id] ?? {}).sort(), d.id).toEqual(["es", "fr", "ht", "vi"]);
+    }
   });
 });

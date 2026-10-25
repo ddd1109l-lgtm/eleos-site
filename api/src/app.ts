@@ -8,7 +8,8 @@ import { filterText } from "./privacy/filter.js";
 import { ChatRequest, describeError, handleChat, HttpError } from "./chat/handler.js";
 import { transcribe } from "./model/client.js";
 import { counselors } from "./data/counselors.js";
-import { whisperLanguage } from "./chat/language.js";
+import { languageCode } from "./chat/language.js";
+import { localizeNotice } from "./chat/localize.js";
 
 export const app = new Hono().basePath("/api");
 
@@ -57,10 +58,11 @@ app.post("/transcribe", async (c) => {
   // No language field: English, as before. A language we have a Whisper hint for: that hint.
   // Anything else (e.g. "Tagalog"): no hint, so Whisper detects it instead of forcing English.
   const language = typeof body["language"] === "string" ? body["language"] : undefined;
-  const raw = await transcribe(audio, language === undefined ? "en" : whisperLanguage(language));
+  const raw = await transcribe(audio, language === undefined ? "en" : languageCode(language));
   // The filter runs on the transcript, because people read numbers aloud.
   const f = filterText(raw);
-  return c.json({ text: f.text, privacy: { masked: f.masked, kinds: f.kinds, notice: f.notice } });
+  const notice = localizeNotice(f.notice, f.kinds, languageCode(language) ?? "en");
+  return c.json({ text: f.text, privacy: { masked: f.masked, kinds: f.kinds, notice } });
 });
 
 export default app;

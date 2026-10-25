@@ -3,15 +3,17 @@ import type OpenAI from "openai";
 import { config } from "../config.js";
 import { complete } from "../model/client.js";
 import { filterText, type FindingKind } from "../privacy/filter.js";
-import { getField, sanitizeProgress, stripClientOnly } from "../spec/engine.js";
+import { getField, report, sanitizeProgress, stripClientOnly } from "../spec/engine.js";
 import type { Field, FormSpec } from "../spec/types.js";
 import { buildSystemPrompt } from "./prompt.js";
-import { normalizeLanguage } from "./language.js";
-import { toolDefinitions, validateToolCall, type Action, type Rejected } from "./tools.js";
+import { languageCode, normalizeLanguage } from "./language.js";
+import { documentName, fallbackText, localizeNotice, type LangCode } from "./localize.js";
+import { toolsFor, validateToolCall, type Action, type Rejected } from "./tools.js";
 import { counselors } from "../data/counselors.js";
 
 export const ChatRequest = z.object({
-  fieldId: z.string(),
+  /** The field on screen. Leave it out and the server uses the engine's next field (none once the form is complete). */
+  fieldId: z.string().optional(),
   progress: z.object({
     answers: z.record(z.string(), z.enum(["yes", "no"])).default({}),
     done: z.array(z.string()).default([]),
@@ -29,25 +31,30 @@ export type ChatResponse = {
   privacy: { masked: boolean; kinds: FindingKind[]; notice: string | null };
   /** The user's latest message after masking. Replace the chat bubble with this. */
   userMessage: string;
-  fieldId: string;
+  /** The field the reply is about: the one sent, or the engine's next field. null once the form is complete. */
+  fieldId: string | null;
   /** true when the model failed and we answered from the spec alone */
   degraded: boolean;
   /** tool calls code refused (dev only; empty in production) */
   rejected: Rejected[];
+  /** action types the server attached itself rather than the model (dev only; empty in production) */
+  addedByCode: Action["type"][];
 };
 
 type Msg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 export async function handleChat(spec: FormSpec, req: ChatRequest): Promise<ChatResponse> {
-  const field = getField(spec, req.fieldId);
-  if (!field) throw new HttpError(400, `Unknown fieldId "${req.fieldId}"`);
   // Answers to clientOnly gates (Section 7) are dropped before anything else sees the progress.
   const progress = sanitizeProgress(spec, stripClientOnly(spec, req.progress));
+  const known = withClientOnlyAnswered(spec, progress);
+  const field = resolveField(spec, req.fieldId, known);
+  const language = normalizeLanguage(req.language);
+  const lang: LangCode = languageCode(language) ?? "en";
 
   // 1. Privacy filter on every message (history too), before anything else touches it.
   const filtered = req.messages.map((m) => ({ role: m.role, ...filterText(m.content) }));
   const last = filtered[filtered.length - 1];
-  const privacy = { masked: last.masked, kinds: last.kinds, notice: last.notice };
+  const privacy = { masked: last.masked, kinds: last.kinds, notice: localizeNotice(last.notice, last.kinds, lang) };
 
   if (last.role !== "user") throw new HttpError(400, "Last message must be from the user");
 
@@ -57,40 +64,75 @@ export async function handleChat(spec: FormSpec, req: ChatRequest): Promise<Chat
   let rejected: Rejected[] = [];
   let degraded = false;
 
+  const addedByCode: Action["type"][] = [];
+
   if (config.provider === "mock") {
     ({ reply, actions } = mockReply(spec, field, last.text, last.masked));
   } else {
     try {
-      ({ reply, actions, rejected } = await runModel(spec, field, progress, filtered, req.mode, normalizeLanguage(req.language)));
+      // With a field on screen the prompt sees progress as sent; with none, as the engine judged it complete.
+      ({ reply, actions, rejected } = await runModel(spec, field, field ? progress : known, filtered, req.mode, language));
     } catch (err) {
       console.error("[chat] model error:", describeError(err));
       degraded = true;
-      reply = `${field.plain} I'm having trouble answering more right now. A free counselor can help.`;
+      reply = [field?.plain, fallbackText(lang)].filter(Boolean).join(" ");
       actions = [{ type: "handoff", reason: "other", contacts: counselors }];
+      addedByCode.push("handoff");
     }
   }
 
-  // 3. A reply that says a picture, or free help, is on the screen must come with one.
+  // 3. Internal ids (document, field, aid) never reach the user.
+  reply = cleanInternalIds(spec, reply, lang);
+
+  // 4. A reply that says a picture, or free help, is on the screen must come with one.
+  const fromModel = new Set(actions);
   ({ reply, actions } = reconcilePictureClaim(spec, field, reply, actions));
   actions = reconcileHelpClaim(spec, field, reply, actions);
+  addedByCode.push(...actions.filter((a) => !fromModel.has(a)).map((a) => a.type));
 
-  // 4. Filter the model's output too, and never let it echo masking tokens back as if they were data.
+  // 5. Filter the model's output too, and never let it echo masking tokens back as if they were data.
   reply = filterText(reply).text;
 
+  const dev = process.env.NODE_ENV !== "production";
   return {
     reply,
     actions,
     privacy,
     userMessage: last.text,
-    fieldId: field.id,
+    fieldId: field?.id ?? null,
     degraded,
-    rejected: process.env.NODE_ENV === "production" ? [] : rejected,
+    rejected: dev ? rejected : [],
+    addedByCode: dev ? addedByCode : [],
   };
 }
 
+/**
+ * The server never sees clientOnly answers (the frontend strips them), so it can't tell whether they
+ * were given. When picking the next field, count them as answered "no"; otherwise every finished
+ * form would point back at the Section 7 gate and never count as complete.
+ */
+function withClientOnlyAnswered(spec: FormSpec, progress: ReturnType<typeof sanitizeProgress>) {
+  const answers = { ...progress.answers };
+  for (const f of spec.fields) if (f.clientOnly && !(f.id in answers)) answers[f.id] = "no";
+  return { ...progress, answers };
+}
+
+/** The field sent wins; without one, the engine's next field; null when the form is complete. */
+function resolveField(spec: FormSpec, fieldId: string | undefined, progress: ReturnType<typeof sanitizeProgress>): Field | null {
+  if (fieldId !== undefined) {
+    const field = getField(spec, fieldId);
+    if (!field) throw new HttpError(400, `Unknown fieldId "${fieldId}"`);
+    return field;
+  }
+  const next = report(spec, progress).nextFieldId;
+  return next ? getField(spec, next)! : null;
+}
+
+const NO_FIELD_REPLY = "Every question on the form is done. Ask me about anything on it, or how to send it in.";
+
 async function runModel(
   spec: FormSpec,
-  field: Field,
+  field: Field | null,
   progress: ReturnType<typeof sanitizeProgress>,
   history: { role: "user" | "assistant"; text: string }[],
   mode: "text" | "voice",
@@ -105,7 +147,7 @@ async function runModel(
 
   // At most 2 tool rounds, then force a text answer.
   for (let round = 0; round < 3; round++) {
-    const msg = await complete(messages, round < 2 ? toolDefinitions : undefined);
+    const msg = await complete(messages, round < 2 ? toolsFor(field) : undefined);
     if (!msg) throw new Error("empty completion");
     const calls = msg.tool_calls ?? [];
     if (calls.length === 0) return finish(msg.content);
@@ -126,7 +168,7 @@ async function runModel(
     const recovered = recoverTextToolCalls(spec, field, content ?? "");
     for (const a of recovered.actions) addAction(actions, a);
     rejected.push(...recovered.rejected);
-    return { reply: recovered.text || field.plain, actions, rejected };
+    return { reply: recovered.text || (field?.plain ?? NO_FIELD_REPLY), actions, rejected };
   }
 }
 
@@ -151,7 +193,7 @@ const TEXT_TOOL_PATTERNS: RegExp[] = [
  * Models sometimes write a tool call into the reply instead of calling it. Pull those out of the
  * text and validate them exactly like real calls, so the user never sees raw markup.
  */
-export function recoverTextToolCalls(spec: FormSpec, field: Field, text: string): { text: string; actions: Action[]; rejected: Rejected[] } {
+export function recoverTextToolCalls(spec: FormSpec, field: Field | null, text: string): { text: string; actions: Action[]; rejected: Rejected[] } {
   const actions: Action[] = [];
   const rejected: Rejected[] = [];
   const take = (name: string, rawArgs: string) => {
@@ -178,15 +220,15 @@ const PICTURE_ON_SCREEN = new RegExp(
 );
 
 /** What the aid viewer opens by default: the first doc.* aid, else the form.* aid. */
-export function defaultAidId(field: Field): string | undefined {
-  return field.aids.find((a) => a.startsWith("doc.")) ?? field.aids.find((a) => a.startsWith("form."));
+export function defaultAidId(field: Field | null): string | undefined {
+  return field?.aids.find((a) => a.startsWith("doc.")) ?? field?.aids.find((a) => a.startsWith("form."));
 }
 
 /**
  * The model sometimes says "a picture is now on the screen" without calling show_aid. Make the
  * reply true: attach the field's default aid, or if the field has none, drop that sentence.
  */
-export function reconcilePictureClaim(spec: FormSpec, field: Field, reply: string, actions: Action[]): { reply: string; actions: Action[] } {
+export function reconcilePictureClaim(spec: FormSpec, field: Field | null, reply: string, actions: Action[]): { reply: string; actions: Action[] } {
   if (actions.some((a) => a.type === "show_aid") || !PICTURE_ON_SCREEN.test(reply)) return { reply, actions };
   const aidId = defaultAidId(field);
   if (aidId) {
@@ -194,7 +236,42 @@ export function reconcilePictureClaim(spec: FormSpec, field: Field, reply: strin
     if (v.ok) return { reply, actions: [...actions, v.action] };
   }
   const kept = reply.replace(/[^.!?\n]+[.!?]*/g, (sentence) => (PICTURE_ON_SCREEN.test(sentence) ? "" : sentence));
-  return { reply: tidy(kept) || field.plain, actions };
+  return { reply: tidy(kept) || (field?.plain ?? NO_FIELD_REPLY), actions };
+}
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const QUOTES = "[`*\"“”']*";
+/** "(id)", "(`id`)", "(**id**)", with the space before it. */
+const inParens = (id: string) => new RegExp(String.raw`\s*\(\s*${QUOTES}${escapeRe(id)}${QUOTES}\s*\)`, "gu");
+/** id on its own, not part of a longer id ("medicare_card" inside "doc.medicare_card.name" doesn't count). */
+const bare = (id: string) => new RegExp(String.raw`\x60?(?<![\p{L}\p{N}_.])${escapeRe(id)}(?![\p{L}\p{N}_])\x60?`, "gu");
+const GENERIC_AID = /(?<![\p{L}\p{N}_.])(?:doc|form)\.[a-z0-9_]+(?:\.[a-z0-9_]+)*/gu;
+
+/**
+ * The prompt shows the model internal ids and it sometimes repeats them. Document ids become the
+ * document's name in the reply language; "(ss_award_letter)" right after the model's own wording for
+ * the document is just dropped, so the name isn't said twice. Field ids, aid ids and fact ids with
+ * an underscore are removed.
+ */
+export function cleanInternalIds(spec: FormSpec, reply: string, lang: LangCode): string {
+  const byLength = (a: string, b: string) => b.length - a.length;
+  const strip = [
+    ...spec.aids.map((a) => a.id),
+    ...spec.fields.map((f) => f.id),
+    ...spec.knowledge.map((k) => k.id).filter((id) => id.includes("_")),
+  ].sort(byLength);
+  let out = reply;
+  for (const id of strip) out = out.replace(inParens(id), "").replace(bare(id), "");
+  out = out.replace(GENERIC_AID, "");
+  for (const doc of [...spec.documents].sort((a, b) => byLength(a.id, b.id))) {
+    out = out.replace(inParens(doc.id), "").replace(bare(doc.id), documentName(spec, doc.id, lang) ?? doc.name);
+  }
+  if (out === reply) return reply;
+  return tidy(
+    out
+      .replace(/\(\s*\)|`\s*`|\*\*\s*\*\*/g, "")
+      .replace(/[ \t]+([,.;:!?)])/g, "$1"),
+  );
 }
 
 function tidy(text: string): string {
@@ -209,7 +286,7 @@ const HELP_ON_SCREEN = new RegExp(
 );
 
 /** "Free help is now on the screen" without a handoff call would leave the user waiting for a card that never opens. */
-export function reconcileHelpClaim(spec: FormSpec, field: Field, reply: string, actions: Action[]): Action[] {
+export function reconcileHelpClaim(spec: FormSpec, field: Field | null, reply: string, actions: Action[]): Action[] {
   if (actions.some((a) => a.type === "handoff") || !HELP_ON_SCREEN.test(reply)) return actions;
   const v = validateToolCall(spec, field, "handoff", JSON.stringify({ reason: "other" }));
   return v.ok ? [...actions, v.action] : actions;
@@ -232,7 +309,7 @@ function parseLooseArgs(raw: string): Record<string, string> {
 }
 
 /** Offline stand-in so the frontend can integrate before anyone has an API key. */
-function mockReply(spec: FormSpec, field: Field, text: string, masked: boolean): { reply: string; actions: Action[] } {
+function mockReply(spec: FormSpec, field: Field | null, text: string, masked: boolean): { reply: string; actions: Action[] } {
   const lower = text.toLowerCase();
   if (masked) {
     return { reply: "Please write that number on the paper form. You never need to share it with me.", actions: [] };
@@ -249,7 +326,7 @@ function mockReply(spec: FormSpec, field: Field, text: string, masked: boolean):
   const aidId = defaultAidId(field);
   const aid = spec.aids.find((a) => a.id === aidId);
   return {
-    reply: `[mock] ${field.plain}`,
+    reply: `[mock] ${field?.plain ?? NO_FIELD_REPLY}`,
     actions: aid ? [{ type: "show_aid", aidId: aid.id, aid }] : [],
   };
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { formSpec } from "../src/spec/form-1mb.js";
 import { validateToolCall } from "../src/chat/tools.js";
 import { buildSystemPrompt } from "../src/chat/prompt.js";
-import { isEnglish, normalizeLanguage, whisperLanguage } from "../src/chat/language.js";
+import { isEnglish, normalizeLanguage, languageCode } from "../src/chat/language.js";
 
 const field = (id: string) => formSpec.fields.find((f) => f.id === id)!;
 
@@ -64,9 +64,9 @@ describe("reply language", () => {
   });
 
   it("maps codes and names to Whisper hints, and nothing else", () => {
-    expect(["es", "Spanish", "Español", "vi", "Tiếng Việt", "French", "Français", "ht", "Haitian Creole", "Kreyòl", "English"].map(whisperLanguage))
+    expect(["es", "Spanish", "Español", "vi", "Tiếng Việt", "French", "Français", "ht", "Haitian Creole", "Kreyòl", "English"].map(languageCode))
       .toEqual(["es", "es", "es", "vi", "vi", "fr", "fr", "ht", "ht", "ht", "en"]);
-    expect(whisperLanguage("Tagalog")).toBeUndefined();
-    expect(whisperLanguage(undefined)).toBeUndefined();
+    expect(languageCode("Tagalog")).toBeUndefined();
+    expect(languageCode(undefined)).toBeUndefined();
   });
 });

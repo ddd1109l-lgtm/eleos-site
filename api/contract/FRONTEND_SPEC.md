@@ -122,7 +122,7 @@ Aid shape: `{ id, image, box: {x, y, w, h}, spoken, caption, placeholder }`. Box
 - If `degraded` is true, add a small note "Answer from the form guide only" (model was unavailable).
 - Read aloud: if on, speak `reply` with `speechSynthesis`. When an aid is shown, also speak its `spoken` line.
 - **Mic:** hold-to-talk or tap-to-start/tap-to-stop with a visible recording state and timer (max 30s). Upload as `multipart/form-data` field `audio` to `/transcribe`. Put the returned `text` (already masked) into the chat as the user message and send it with `mode: "voice"`. If its `privacy.masked` is true, show the notice.
-- Keep one chat history across fields (don't reset when the field changes), send at most the last 12 messages, and always send the current `fieldId`.
+- Keep one chat history across fields (don't reset when the field changes), send at most the last 12 messages, and always send the current `fieldId` when a field is open (without one, the server picks the engine's next field).
 - Loading state on the assistant bubble ("Thinking…"). Typical reply is 1–3 seconds.
 - Errors: show "Something went wrong. Try again, or talk to a person." with the counselor button.
 
@@ -164,7 +164,7 @@ type ProgressReport = {
 
 // POST /chat
 type ChatRequest = {
-  fieldId: string;                    // the field on screen
+  fieldId?: string;                   // the field on screen; leave it out when none is (the server uses the engine's next field)
   progress: Progress;                 // after stripClientOnly(spec, progress)
   messages: { role: "user" | "assistant"; content: string }[];  // last item must be the user's; max 30
   mode?: "text" | "voice";            // voice = shorter, speakable replies
@@ -182,9 +182,10 @@ type ChatResponse = {
   actions: Action[];
   privacy: { masked: boolean; kinds: ("ssn" | "mbi")[]; notice: string | null };
   userMessage: string;                // the user's text after masking; render THIS, not what they typed
-  fieldId: string;
+  fieldId: string | null;             // the field the reply is about; null when no fieldId was sent and the form is complete
   degraded: boolean;
   rejected: unknown[];                // debug only, ignore
+  addedByCode: string[];              // debug only, ignore (action types the server attached, not the model)
 };
 
 // POST /transcribe   multipart/form-data, field "audio" (<= 4 MB; the 30s mic limit stays well under it)

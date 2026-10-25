@@ -1,6 +1,18 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 let app: typeof import("../src/app.js").app;
+
+/** Answer every gate (yes for the ones listed), mark everything else done: a finished form. */
+async function finished(yes: string[]) {
+  const { formSpec } = await import("../src/spec/form-1mb.js");
+  const { report } = await import("../src/spec/engine.js");
+  let p = { answers: {} as Record<string, "yes" | "no">, done: [] as string[] };
+  for (let next = report(formSpec, p).nextFieldId; next; next = report(formSpec, p).nextFieldId) {
+    const f = formSpec.fields.find((x) => x.id === next)!;
+    p = f.kind === "gate" ? { ...p, answers: { ...p.answers, [f.id]: yes.includes(f.id) ? "yes" : "no" } } : { ...p, done: [...p.done, f.id] };
+  }
+  return p;
+}
 beforeAll(async () => {
   process.env.MODEL_PROVIDER = "mock";
   ({ app } = await import("../src/app.js"));
@@ -92,6 +104,29 @@ describe("API (mock model)", () => {
     expect(ok.status).toBe(200);
     const long = await post("/chat", { fieldId: "s6_gross_amount", language: "x".repeat(61), messages: [{ role: "user", content: "hi" }] });
     expect(long.status).toBe(400);
+  });
+
+  it("chat without fieldId uses the engine's next field", async () => {
+    const r = await (await post("/chat", { messages: [{ role: "user", content: "what do I do first?" }] })).json();
+    expect(r.fieldId).toBe("cover_language");
+    expect(r.degraded).toBe(false);
+  });
+
+  it("chat without fieldId on a finished form: no field, no picture", async () => {
+    // Ray answered the Section 7 gate on the device; it is stripped before the server sees it.
+    const res = await post("/chat", { progress: await finished(["s6_other_money", "s7_medical_bills"]), messages: [{ role: "user", content: "where do I find this?" }] });
+    expect(res.status).toBe(200);
+    const r = await res.json();
+    expect(r.fieldId).toBeNull();
+    expect(r.actions.filter((a: { type: string }) => a.type === "show_aid")).toEqual([]);
+    expect(r.reply.length).toBeGreaterThan(0);
+  });
+
+  it("the privacy notice follows the reply language", async () => {
+    const es = await (await post("/chat", { fieldId: "s1_ssn", language: "Español", messages: [{ role: "user", content: "es 123-45-6789" }] })).json();
+    expect(es.privacy.notice).toBe("No necesita decirme su número de Seguro Social. Escríbalo directamente en el formulario de papel. Lo borré de este chat.");
+    const other = await (await post("/chat", { fieldId: "s1_ssn", language: "Tagalog", messages: [{ role: "user", content: "123-45-6789" }] })).json();
+    expect(other.privacy.notice).toMatch(/^You don't need to tell me your Social Security number/);
   });
 
   it("rejects unknown fields", async () => {
