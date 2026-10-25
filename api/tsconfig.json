@@ -8,6 +8,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "types": ["node"],
+    "typeRoots": ["./node_modules/@types"],
     "noEmit": true
   },
   "include": ["src", "scripts", "test"]

@@ -10,6 +10,7 @@ cp .env.example .env      # add MODEL_API_KEY (Groq: console.groq.com/keys)
 npm run dev               # http://localhost:8787/api
 npm test                  # 50 tests: privacy filter, branching for all 3 personas, tool guardrails, API
 npm run smoke             # live check against the real model (needs the key)
+bash scripts/voice-smoke.sh   # live /transcribe check (macOS; start npm run dev first)
 npm run contract          # regenerate contract/ for the frontend after editing the spec
 ```
 
@@ -51,10 +52,9 @@ contract/              what Leigh needs: FRONTEND_SPEC.md, form-spec.json, spec-
 
 ## Deploy
 
-Vercel picks up `src/index.ts` (exports the Hono app). Set the same env vars in the Vercel project, and add the frontend's URL to `CORS_ORIGINS`. Railway/Render work too with `npm start`.
+Vercel's Hono preset finds `src/app.ts` first (it default-exports the app; `src/index.ts` is a fallback). Root Directory = `api`, everything else default, no `vercel.json`. `tsconfig.json` sets `typeRoots` because Vercel compiles through a temp tsconfig that extends ours and can't otherwise find `@types/node`. Set the same env vars in the Vercel project, and add the frontend's URL to `CORS_ORIGINS`. Vercel caps request bodies at 4.5 MB, so audio uploads over that get Vercel's own 413 before our 10 MB check runs. Railway/Render work too with `npm start`.
 
 ## Still to do
 
 - Document highlight boxes: the 6 `doc.*` aids are still `placeholder: true` until Leigh's mock documents exist. Form-page boxes are measured (`FORM_BOXES_PT` in `src/spec/form-1mb.ts`) and the page images are in `contract/aids/form/` (rendered from `assets/MedicareSavingsProgram.pdf` at 150 dpi).
-- `npm run smoke` with the real key; tune the prompt on anything that fails.
 - Counselor review of the spec (LaSHIP call Monday).
