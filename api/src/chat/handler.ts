@@ -3,7 +3,7 @@ import type OpenAI from "openai";
 import { config } from "../config.js";
 import { complete } from "../model/client.js";
 import { filterText, type FindingKind } from "../privacy/filter.js";
-import { getField, sanitizeProgress } from "../spec/engine.js";
+import { getField, sanitizeProgress, stripClientOnly } from "../spec/engine.js";
 import type { Field, FormSpec } from "../spec/types.js";
 import { buildSystemPrompt } from "./prompt.js";
 import { toolDefinitions, validateToolCall, type Action, type Rejected } from "./tools.js";
@@ -38,7 +38,8 @@ type Msg = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 export async function handleChat(spec: FormSpec, req: ChatRequest): Promise<ChatResponse> {
   const field = getField(spec, req.fieldId);
   if (!field) throw new HttpError(400, `Unknown fieldId "${req.fieldId}"`);
-  const progress = sanitizeProgress(spec, req.progress);
+  // Answers to clientOnly gates (Section 7) are dropped before anything else sees the progress.
+  const progress = sanitizeProgress(spec, stripClientOnly(spec, req.progress));
 
   // 1. Privacy filter on every message (history too), before anything else touches it.
   const filtered = req.messages.map((m) => ({ role: m.role, ...filterText(m.content) }));
@@ -59,14 +60,17 @@ export async function handleChat(spec: FormSpec, req: ChatRequest): Promise<Chat
     try {
       ({ reply, actions, rejected } = await runModel(spec, field, progress, filtered, req.mode));
     } catch (err) {
-      console.error("[chat] model error:", (err as Error).message);
+      console.error("[chat] model error:", describeError(err));
       degraded = true;
       reply = `${field.plain} I'm having trouble answering more right now. A free counselor can help.`;
       actions = [{ type: "handoff", reason: "other", contacts: counselors }];
     }
   }
 
-  // 3. Filter the model's output too, and never let it echo masking tokens back as if they were data.
+  // 3. A reply that says a picture is on the screen must come with one.
+  ({ reply, actions } = reconcilePictureClaim(spec, field, reply, actions));
+
+  // 4. Filter the model's output too, and never let it echo masking tokens back as if they were data.
   reply = filterText(reply).text;
 
   return {
@@ -156,8 +160,42 @@ export function recoverTextToolCalls(spec: FormSpec, field: Field, text: string)
   out = out.replace(TEXT_TOOL_PATTERNS[1], (_m, name: string, inner: string) => take(name, inner));
   out = out.replace(TEXT_TOOL_PATTERNS[2], (_m, json: string, key: string) => take(key === "aid_id" ? "show_aid" : "handoff", json));
 
-  out = out.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ").trim();
-  return { text: out, actions, rejected };
+  return { text: tidy(out), actions, rejected };
+}
+
+const PICTURE_ON_SCREEN = /\b(picture|image|photo|highlight\w*)\b[^.!?\n]*\bscreen\b|\bscreen\b[^.!?\n]*\b(picture|image|photo|highlight\w*)\b/i;
+
+/** What the aid viewer opens by default: the first doc.* aid, else the form.* aid. */
+export function defaultAidId(field: Field): string | undefined {
+  return field.aids.find((a) => a.startsWith("doc.")) ?? field.aids.find((a) => a.startsWith("form."));
+}
+
+/**
+ * The model sometimes says "a picture is now on the screen" without calling show_aid. Make the
+ * reply true: attach the field's default aid, or if the field has none, drop that sentence.
+ */
+export function reconcilePictureClaim(spec: FormSpec, field: Field, reply: string, actions: Action[]): { reply: string; actions: Action[] } {
+  if (actions.some((a) => a.type === "show_aid") || !PICTURE_ON_SCREEN.test(reply)) return { reply, actions };
+  const aidId = defaultAidId(field);
+  if (aidId) {
+    const v = validateToolCall(spec, field, "show_aid", JSON.stringify({ aid_id: aidId }));
+    if (v.ok) return { reply, actions: [...actions, v.action] };
+  }
+  const kept = reply.replace(/[^.!?\n]+[.!?]*/g, (sentence) => (PICTURE_ON_SCREEN.test(sentence) ? "" : sentence));
+  return { reply: tidy(kept) || field.plain, actions };
+}
+
+function tidy(text: string): string {
+  return text.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ").trim();
+}
+
+/**
+ * Safe to log: name, HTTP status and error code only. Provider error messages can quote the
+ * request (and so the user's words), so the message itself is never logged.
+ */
+export function describeError(err: unknown): string {
+  const e = err as { name?: string; status?: number; code?: string | null; type?: string | null };
+  return [e?.name ?? "Error", e?.status, e?.code, e?.type].filter((x) => x !== undefined && x !== null && x !== "").join(" ");
 }
 
 /** Accepts aid_id="X", aid_id: 'X', {"aid_id":"X"} and mixes of them. */
@@ -182,7 +220,7 @@ function mockReply(spec: FormSpec, field: Field, text: string, masked: boolean):
   if (/\b(counselor|person|human|help me|stuck)\b/.test(lower)) {
     return { reply: "Here are free people who can help you with this form.", actions: [{ type: "handoff", reason: "user_asked", contacts: counselors }] };
   }
-  const aidId = field.aids.find((a) => a.startsWith("doc.")) ?? field.aids[0];
+  const aidId = defaultAidId(field);
   const aid = spec.aids.find((a) => a.id === aidId);
   return {
     reply: `[mock] ${field.plain}`,

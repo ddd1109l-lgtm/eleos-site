@@ -29,6 +29,7 @@ const always: Check[] = [
   lacks("aid_id"),
   // The app shows the counselor card; the model must not write its own (possibly wrong) numbers.
   ...["icon", "menu", "click here", "tap the"].map((s) => [`reply lacks "${s}" (case-insensitive)`, (r: Result) => !r.reply.toLowerCase().includes(s)] as Check),
+  ['"on the screen" only with a show_aid or handoff', (r, t) => !/on the screen/i.test(r.reply) || t.includes("show_aid") || t.includes("handoff")],
   ["no phone number in a handoff reply", (r, t) => !t.includes("handoff") || !/\d{3}[-\s.\u2011]\d{4}/.test(r.reply)],
 ];
 

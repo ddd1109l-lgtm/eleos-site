@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 let app: typeof import("../src/app.js").app;
 beforeAll(async () => {
@@ -57,6 +57,34 @@ describe("API (mock model)", () => {
     })).json();
     expect(r.actions[0].type).toBe("handoff");
     expect(r.actions[0].contacts[0].phone).toBe("1-800-259-5300");
+  });
+
+  it("chat answers for a Section 7 field with no gate answer", async () => {
+    const res = await post("/chat", {
+      fieldId: "s7_total_cost",
+      progress: { answers: { s6_other_money: "yes" }, done: [] },
+      messages: [{ role: "user", content: "what do I write here?" }],
+    });
+    expect(res.status).toBe(200);
+    const r = await res.json();
+    expect(r).toMatchObject({ fieldId: "s7_total_cost", degraded: false });
+    expect(r.reply.length).toBeGreaterThan(0);
+  });
+
+  it("progress drops clientOnly answers and the done ids they control", async () => {
+    const r = await (await post("/progress", {
+      progress: { answers: { s6_other_money: "yes", s7_medical_bills: "yes" }, done: ["s6_gross_amount", "s7_provider"] },
+    })).json();
+    expect(r.progress).toEqual({ answers: { s6_other_money: "yes" }, done: ["s6_gross_amount"] });
+  });
+
+  it("bad JSON is a 400, and the body never reaches the logs", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await app.request("/api/chat", { method: "POST", body: "my ssn is 123-45-6789 {", headers: { "Content-Type": "application/json" } });
+    expect(res.status).toBe(400);
+    expect(await res.text()).not.toContain("6789");
+    expect(JSON.stringify(log.mock.calls)).not.toContain("6789");
+    log.mockRestore();
   });
 
   it("rejects unknown fields", async () => {

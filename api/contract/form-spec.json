@@ -925,6 +925,7 @@
       "section": "s7",
       "page": 3,
       "kind": "gate",
+      "clientOnly": true,
       "label": "Do you or your spouse have medical bills (paid or unpaid) for medical care received in the past 3 months?",
       "plain": "Answer on the paper form. Here, just tell the app whether to walk you through the rest of Section 7. If No, skip to Section 8.",
       "aids": []

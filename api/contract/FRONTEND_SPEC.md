@@ -20,15 +20,16 @@ Users are mostly 65+, many with low vision, low digital literacy or both. Design
 2. **Never display a raw chat message the user typed.** Send it, show a "Sending…" placeholder, then render the masked `userMessage` the API returns. This is how a typed SSN never appears on screen.
 3. **When `privacy.masked` is true**, show `privacy.notice` as a clearly visible, friendly banner (not red, not scary) under the user's bubble.
 4. **Never say whether someone qualifies.** No eligibility calculator, no income-limit tables, no "You qualify!" Copy on Finish says "Apply even if you're not sure."
-5. **Never mark the form complete yourself.** Show the Finish screen only when the API (or the local engine in mock mode) returns `complete: true`.
+5. **Never mark the form complete yourself.** The frontend always runs `contract/engine.ts` locally, online and in mock mode, and trusts its `nextFieldId`, `complete`, `statuses` and `sections`. Show the Finish screen only when it returns `complete: true`. `POST /progress` stays available but is optional.
 6. **Storage:** progress (gate answers + list of done field ids) in `localStorage` only. Chat history in memory only; it disappears on reload. Nothing else is stored.
 7. Every mock document image is stamped **SAMPLE** and uses made-up data. Mock Medicare Numbers must break the real format by using one of the letters S, L, O, I, B or Z (example: `1EG4-SO5-MK73`), so a real number is never shown.
+8. **Client-only answers stay on the device.** Never send answers for fields with `clientOnly: true` to any endpoint; strip them from `progress` before every `/chat` call. `stripClientOnly(spec, progress)` in `contract/engine.ts` does this (it also drops the done ids of fields those gates control, since those would reveal the answer). Keep the full progress, clientOnly answers included, in `localStorage` and in the local engine.
 
 ## 3. Tech
 
 - React + Vite + TypeScript + Tailwind (if your tool uses something else, keep the API contract and component behavior identical).
 - `VITE_API_URL` env var. Empty means mock mode.
-- Types: copy `contract/spec-types.ts` into `src/types/`. The API types are in section 9 below.
+- Types and engine: copy `contract/spec-types.ts` and `contract/engine.ts` into the same folder (e.g. `src/types/`); `engine.ts` imports `./spec-types.js`. Both are generated from the backend, so re-copy them when the contract changes instead of editing them. The API types are in section 9 below.
 - Browser text-to-speech (`window.speechSynthesis`) for reading replies aloud. It runs on the device, which is also better for privacy.
 - Mic recording with `MediaRecorder` (webm/opus is fine), sent to `/transcribe`.
 
@@ -50,9 +51,9 @@ Users are mostly 65+, many with low vision, low digital literacy or both. Design
 Desktop: three columns. Mobile: field card on top, then aid viewer, then chat; checklist in a slide-out drawer.
 
 **Checklist (left / drawer)**
-- One row per `spec.sections` entry with its `title` and status from `/progress` `sections[]`: done (check), in_progress (half circle), todo (empty), skipped (gray "Skipped").
+- One row per `spec.sections` entry with its `title` and status from the engine's `sections[]`: done (check), in_progress (half circle), todo (empty), skipped (gray "Skipped").
 - Expand a section to see its visible fields with `statuses[fieldId]`. Hidden fields are not shown.
-- Tapping a done field reopens it (user can review). The engine still decides what is "next."
+- Tapping ANY visible field (done or todo) opens it. After the user acts on it (Yes/No, I wrote it, Skip, I've read it), go to the engine's `nextFieldId`.
 - Progress bar: `requiredDone / requiredTotal`.
 
 **Field card (center)**
@@ -66,7 +67,7 @@ Desktop: three columns. Mobile: field card on top, then aid viewer, then chat; c
 - `sensitive === "id_number"`: show a lock callout: "Write this on the paper form. Don't type or say it here."
 - `sensitive === "health"`: callout: "This part is about medical bills. The guide will explain the questions but won't ask about your health."
 - `sensitive === "account"`: callout: "Don't write or type account numbers. A short description like the bank's name is enough."
-- **Back** button to the previous field. After every button press, call `/progress` and move to `nextFieldId`.
+- **Back** button to the previous field. After every button press, run the engine and move to its `nextFieldId`.
 
 **Aid viewer (right)**
 - When the field has aids, show the first `doc.*` aid if any, else the `form.*` aid. Thumbnails/tabs for the others ("On the form" / "On your document").
@@ -96,8 +97,8 @@ Desktop: three columns. Mobile: field card on top, then aid viewer, then chat; c
 Never hardcode the order or the branches. The spec drives everything:
 - `fields[]` is in form order.
 - A field shows only if its `condition` passes (`{field, equals}`, `{all:[]}`, `{any:[]}` against `progress.answers`).
-- Online: call `POST /progress` after every change and trust its `nextFieldId`, `complete`, `statuses`, `sections`.
-- Mock mode: implement the same logic locally (it's ~40 lines: visible if condition passes; gate is done when answered; others done when in `done`; next = first visible not-done field; complete = all visible required done).
+- Always run `contract/engine.ts` locally, online and in mock mode: call `report(spec, progress)` after every change and trust its `nextFieldId`, `complete`, `statuses`, `sections`. It is the same code the backend runs.
+- `POST /progress` stays available but is optional. Don't save its `progress` over yours: it never contains `clientOnly` answers.
 
 Optional fields still come up in order; the user taps Skip to move past them.
 
@@ -150,9 +151,9 @@ type Health = { ok: true; provider: string; model: string; stt: string; mock: bo
 // GET /counselors -> Contact[]
 type Contact = { id: string; name: string; phone: string; tty?: string; hours?: string; web?: string; why: string };
 
-// POST /progress   body: { progress: Progress }
+// POST /progress   body: { progress: Progress }   (optional: same logic as contract/engine.ts report())
 type ProgressReport = {
-  progress: Progress;                 // cleaned version; save this back to localStorage
+  progress: Progress;                 // cleaned version, without clientOnly answers; don't save it over local progress
   nextFieldId: string | null;
   complete: boolean;                  // only true when every visible required field is done
   requiredDone: number;
@@ -164,7 +165,7 @@ type ProgressReport = {
 // POST /chat
 type ChatRequest = {
   fieldId: string;                    // the field on screen
-  progress: Progress;
+  progress: Progress;                 // after stripClientOnly(spec, progress)
   messages: { role: "user" | "assistant"; content: string }[];  // last item must be the user's; max 30
   mode?: "text" | "voice";            // voice = shorter, speakable replies
 };
@@ -183,13 +184,15 @@ type ChatResponse = {
   rejected: unknown[];                // debug only, ignore
 };
 
-// POST /transcribe   multipart/form-data, field "audio" (<= 10 MB)
+// POST /transcribe   multipart/form-data, field "audio" (<= 4 MB; the 30s mic limit stays well under it)
 type TranscribeResponse = { text: string; privacy: { masked: boolean; kinds: string[]; notice: string | null } };
 
 // POST /filter   body: { text: string }  -> { text, masked, kinds, notice }
 // Optional helper if you want to pre-check text client-side. Not required.
 
 // Errors: { error: string } with status 400 / 413 / 500
+// Vercel itself rejects bodies over 4.5 MB with a 413 that is NOT JSON. If an error body doesn't
+// parse, show the standard message: "Something went wrong. Try again, or talk to a person."
 ```
 
 Real examples of every response are in `contract/fixtures/`. In mock mode, return those (pick `chat-ssn-masked.json` if the message contains 9 digits, `chat-handoff.json` if it contains "qualify", else `chat-show-aid.json`).
@@ -213,7 +216,7 @@ Put them in `public/aids/`. All made-up data, stamped SAMPLE diagonally, built i
 
 1. Welcome → Start → Gather documents → I'm ready.
 2. Click through Section 1 quickly. On "Social Security number," type `123-45-6789` in chat. The bubble shows `[SSN removed]` and the friendly notice appears.
-3. Skip ahead via the checklist to Section 6 "How much are they paid?". Ask "Where do I find this?". Aid viewer shows the award letter with the $1,180 line pulsing.
+3. Open Section 6 from the checklist, answer Yes to the 'other money' question, then open 'How much are they paid?'. Ask "Where do I find this?". Aid viewer shows the award letter with the $1,180 line pulsing.
 4. Tap the mic and say "What counts as income?" Reply is read aloud.
 5. Ask "Do I qualify?" → counselor card opens with LaSHIP 1-800-259-5300.
 6. Fast-forward to Finish (use a hidden dev shortcut: `?demo=finish` loads a completed Dorothy progress object) → ways to apply.

@@ -1,10 +1,12 @@
 /**
- * Writes the frontend contract: the form spec and real example responses from the API (mock mode).
+ * Writes the frontend contract: the form spec, its types, the progress engine, and real example
+ * responses from the API (mock mode).
  *   npm run contract
  * Leigh copies contract/ into her app so it runs with no backend.
  */
 process.env.MODEL_PROVIDER = "mock";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { contractEngineSource } from "./contract-engine.js";
 
 const { app } = await import("../src/app.js");
 const { formSpec } = await import("../src/spec/form-1mb.js");
@@ -16,6 +18,9 @@ const post = async (path: string, body: unknown) =>
   (await app.request(`/api${path}`, { method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json" } })).json();
 
 write("form-spec.json", formSpec);
+// Same files the server runs, so the frontend's engine can't drift from ours.
+writeFileSync(`${out}/spec-types.ts`, readFileSync("src/spec/types.ts", "utf8"));
+writeFileSync(`${out}/engine.ts`, contractEngineSource(readFileSync("src/spec/engine.ts", "utf8")));
 write("fixtures/health.json", await (await app.request("/api/health")).json());
 write("fixtures/counselors.json", await (await app.request("/api/counselors")).json());
 write("fixtures/progress-start.json", await post("/progress", { progress: { answers: {}, done: [] } }));
@@ -28,4 +33,4 @@ write("fixtures/chat-show-aid.json", await post("/chat", { fieldId: "s6_gross_am
 write("fixtures/chat-ssn-masked.json", await post("/chat", { fieldId: "s1_ssn", progress: dorothy, messages: [{ role: "user", content: "it's 123-45-6789" }] }));
 write("fixtures/chat-handoff.json", await post("/chat", { fieldId: "s6_gross_amount", progress: dorothy, messages: [{ role: "user", content: "Do I qualify?" }] }));
 write("fixtures/filter.json", await post("/filter", { text: "my medicare number is 1EG4-TE5-MK73" }));
-console.log(`Wrote ${out}/form-spec.json and ${out}/fixtures/*.json`);
+console.log(`Wrote ${out}/form-spec.json, spec-types.ts, engine.ts and fixtures/*.json`);

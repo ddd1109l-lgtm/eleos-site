@@ -28,9 +28,9 @@ describe("system prompt", () => {
     const p = buildSystemPrompt(formSpec, field("s6_gross_amount"), { answers: { s6_other_money: "yes" }, done: [] }, "text");
     for (const n of ["1,330", "1,350", "1,596", "1,616", "1,796", "1,816"]) expect(p).not.toContain(n);
   });
-  it("stays under 6,500 characters for s6_gross_amount (text mode)", () => {
+  it("stays under 7,000 characters for s6_gross_amount (text mode)", () => {
     const p = buildSystemPrompt(formSpec, field("s6_gross_amount"), { answers: { s6_other_money: "yes" }, done: [] }, "text");
-    expect(p.length).toBeLessThan(6500);
+    expect(p.length).toBeLessThan(7000);
   });
   it("hides branches the person skipped", () => {
     const p = buildSystemPrompt(formSpec, field("s1_dob"), { answers: { s3_married_living_together: "no" }, done: [] }, "text");

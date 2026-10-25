@@ -1,6 +1,9 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { formSpec } from "../src/spec/form-1mb.js";
-import { report, sanitizeProgress } from "../src/spec/engine.js";
+import { assumeVisible, report, sanitizeProgress, stripClientOnly } from "../src/spec/engine.js";
+import * as contractEngine from "../contract/engine.js";
+import { contractEngineSource } from "../scripts/contract-engine.js";
 import type { Progress } from "../src/spec/types.js";
 
 const ids = new Set(formSpec.fields.map((f) => f.id));
@@ -109,5 +112,59 @@ describe("form highlight boxes", () => {
       expect(a.box.x + a.box.w, a.id).toBeLessThanOrEqual(100);
       expect(a.box.y + a.box.h, a.id).toBeLessThanOrEqual(100);
     }
+  });
+});
+
+const personas = {
+  dorothy: { s6_other_money: "yes" },
+  haroldAndGloria: { s3_married_living_together: "yes", s3_spouse_applying: "yes", s5_anyone_works: "yes", s6_other_money: "yes" },
+  ray: { s6_other_money: "yes", s7_medical_bills: "yes" },
+} as const;
+
+describe("contract/engine.ts (the frontend's copy)", () => {
+  it("is the current output of npm run contract", () => {
+    expect(readFileSync("contract/engine.ts", "utf8")).toBe(contractEngineSource(readFileSync("src/spec/engine.ts", "utf8")));
+    expect(readFileSync("contract/spec-types.ts", "utf8")).toBe(readFileSync("src/spec/types.ts", "utf8"));
+  });
+
+  const states: Record<string, Progress> = {
+    "empty": { answers: {}, done: [] },
+    "Dorothy complete": walk(personas.dorothy).progress,
+    "Harold & Gloria complete": walk(personas.haroldAndGloria).progress,
+    "Ray complete": walk(personas.ray).progress,
+    "Dorothy midway": {
+      answers: { s2_home_different: "no", s3_married_living_together: "no", s5_anyone_works: "no", s6_other_money: "yes" },
+      done: ["cover_language", "s1_name", "s1_ssn", "s1_dob", "s1_sex", "s1_marital_status", "s2_mailing_address", "s2_parish", "s2_phones"],
+    },
+    "Harold & Gloria, spouse branch open, nothing done": { answers: { s3_married_living_together: "yes", s3_spouse_applying: "yes" }, done: [] },
+    "Ray, Section 7 open, one bill field done": { answers: { s6_other_money: "yes", s7_medical_bills: "yes" }, done: ["s7_provider"] },
+    "Ray unsigned": { ...walk(personas.ray).progress, done: walk(personas.ray).progress.done.filter((d) => d !== "sign_applicant") },
+    "junk ids and a non-gate answer": { answers: { nope: "yes", s1_name: "yes", s6_other_money: "no" }, done: ["nope", "s6_other_money", "s1_name", "s1_name"] },
+  };
+  for (const [name, progress] of Object.entries(states)) {
+    it(`matches the server engine: ${name}`, () => {
+      expect(contractEngine.report(formSpec, progress)).toEqual(report(formSpec, progress));
+    });
+  }
+});
+
+describe("client-only gate", () => {
+  it("Section 7's gate is the clientOnly one", () => {
+    expect(formSpec.fields.filter((f) => f.clientOnly).map((f) => f.id)).toEqual(["s7_medical_bills"]);
+  });
+
+  it("stripClientOnly drops the answer and the Section 7 done ids, keeps everything else", () => {
+    const p = stripClientOnly(formSpec, walk(personas.ray).progress);
+    expect(p.answers).not.toHaveProperty("s7_medical_bills");
+    expect(p.answers).toHaveProperty("s6_other_money", "yes");
+    expect(p.done!.filter((id) => id.startsWith("s7_"))).toEqual([]);
+    expect(p.done).toContain("s6_gross_amount");
+  });
+
+  it("assumeVisible opens the branch for the field on screen without touching other answers", () => {
+    const provider = formSpec.fields.find((f) => f.id === "s7_provider")!;
+    const p = assumeVisible(provider, { answers: { s6_other_money: "yes" }, done: [] });
+    expect(p.answers).toEqual({ s6_other_money: "yes", s7_medical_bills: "yes" });
+    expect(report(formSpec, p).statuses.s7_provider).toBe("todo");
   });
 });

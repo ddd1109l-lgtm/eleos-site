@@ -1,12 +1,13 @@
 import type { Field, FormSpec, Progress } from "../spec/types.js";
-import { report } from "../spec/engine.js";
+import { assumeVisible, report } from "../spec/engine.js";
 
 /**
  * Builds the system prompt. The whole spec fits, so there's no retrieval to get wrong.
  * Income limits are deliberately NOT included: the model must never judge eligibility.
  */
 export function buildSystemPrompt(spec: FormSpec, current: Field, progress: Progress, mode: "text" | "voice"): string {
-  const r = report(spec, progress);
+  // The field on screen is authoritative, even if the gate that shows it was answered only on the device.
+  const r = report(spec, assumeVisible(current, progress));
   const section = spec.sections.find((s) => s.id === current.section);
 
   // Only the current section's fields, plus a one-line map of every section, to keep the prompt small.

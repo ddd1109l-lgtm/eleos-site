@@ -261,7 +261,7 @@ const fields: Field[] = [
     repeatNote: "Use one column per source, up to 3 sources." }),
 
   // 7 - Medical Expenses (health information: the app explains, never asks for details)
-  f({ id: "s7_medical_bills", section: "s7", page: 3, kind: "gate", sensitive: "health",
+  f({ id: "s7_medical_bills", section: "s7", page: 3, kind: "gate", sensitive: "health", clientOnly: true,
     label: "Do you or your spouse have medical bills (paid or unpaid) for medical care received in the past 3 months?",
     plain: "Answer on the paper form. Here, just tell the app whether to walk you through the rest of Section 7. If No, skip to Section 8." }),
   ...([

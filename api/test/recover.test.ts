@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formSpec } from "../src/spec/form-1mb.js";
-import { recoverTextToolCalls } from "../src/chat/handler.js";
+import { describeError, reconcilePictureClaim, recoverTextToolCalls } from "../src/chat/handler.js";
 
 const field = (id: string) => formSpec.fields.find((f) => f.id === id)!;
 const ssn = field("s1_ssn");
@@ -53,5 +53,49 @@ describe("tool calls written as text", () => {
     const plain = recoverTextToolCalls(formSpec, gross, "Use the bigger number (before Medicare) on your letter.");
     expect(plain.text).toBe("Use the bigger number (before Medicare) on your letter.");
     expect(plain.actions).toEqual([]);
+  });
+});
+
+describe("picture claims without a picture", () => {
+  const claim = "Write it on the form. If you need to see where to write it, a picture is now on the screen.";
+
+  it("attaches the form aid when the field has no doc aid", () => {
+    const r = reconcilePictureClaim(formSpec, ssn, claim, []);
+    expect(r.reply).toBe(claim);
+    expect(r.actions).toEqual([expect.objectContaining({ type: "show_aid", aidId: "form.s1_ssn" })]);
+  });
+
+  it("prefers the first doc aid, like the aid viewer", () => {
+    const r = reconcilePictureClaim(formSpec, gross, "The image on your screen shows the line.", []);
+    expect(r.actions).toEqual([expect.objectContaining({ aidId: "doc.award_letter.before_deductions" })]);
+  });
+
+  it("keeps a handoff and still adds the picture", () => {
+    const handoff = { type: "handoff" as const, reason: "stuck", contacts: [] };
+    const r = reconcilePictureClaim(formSpec, ssn, claim, [handoff]);
+    expect(r.actions.map((a) => a.type)).toEqual(["handoff", "show_aid"]);
+  });
+
+  it("drops the sentence when the field has no aids", () => {
+    const r = reconcilePictureClaim(formSpec, field("s6_other_money"), "Answer Yes or No. The picture on the screen shows the box.", []);
+    expect(r.reply).toBe("Answer Yes or No.");
+    expect(r.actions).toEqual([]);
+  });
+
+  it("leaves replies alone when a picture was really shown, or none was mentioned", () => {
+    const shown = recoverTextToolCalls(formSpec, ssn, '[show_aid aid_id="form.s1_ssn"]').actions;
+    expect(reconcilePictureClaim(formSpec, ssn, claim, shown).actions).toBe(shown);
+    const help = reconcilePictureClaim(formSpec, gross, "Apply even if you're not sure. Free help is now on the screen.", []);
+    expect(help.actions).toEqual([]);
+    expect(help.reply).toBe("Apply even if you're not sure. Free help is now on the screen.");
+  });
+});
+
+describe("error logging", () => {
+  it("logs name, status and code, never the message", () => {
+    const err = Object.assign(new Error('400 could not parse "my secret words"'), { name: "BadRequestError", status: 400, code: "invalid_request" });
+    const line = describeError(err);
+    expect(line).toBe("BadRequestError 400 invalid_request");
+    expect(line).not.toContain("secret");
   });
 });

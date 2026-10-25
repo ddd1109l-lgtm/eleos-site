@@ -58,6 +58,8 @@ export type Field = {
   tips?: string[];
   /** Field exists only in the app (e.g. a branching question the paper form implies) */
   appOnly?: boolean;
+  /** Gate whose answer never leaves the browser (it would reveal health information). The server drops it if sent. */
+  clientOnly?: boolean;
   /** For job / income / expense columns: "Use one column per job, up to 3" */
   repeatNote?: string;
 };

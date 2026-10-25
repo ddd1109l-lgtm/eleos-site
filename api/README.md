@@ -47,12 +47,12 @@ src/spec/engine.ts     branching + completion
 src/privacy/filter.ts  SSN / MBI masking
 src/chat/              prompt, tools, handler
 src/model/client.ts    OpenAI-compatible client (Groq / vLLM / Ollama / ...)
-contract/              what Leigh needs: FRONTEND_SPEC.md, form-spec.json, spec-types.ts, fixtures/
+contract/              what Leigh needs: FRONTEND_SPEC.md, form-spec.json, spec-types.ts, engine.ts (generated copy of src/spec/engine.ts), fixtures/
 ```
 
 ## Deploy
 
-Vercel's Hono preset finds `src/app.ts` first (it default-exports the app; `src/index.ts` is a fallback). Root Directory = `api`, everything else default, no `vercel.json`. `tsconfig.json` sets `typeRoots` because Vercel compiles through a temp tsconfig that extends ours and can't otherwise find `@types/node`. Set the same env vars in the Vercel project, and add the frontend's URL to `CORS_ORIGINS`. Vercel caps request bodies at 4.5 MB, so audio uploads over that get Vercel's own 413 before our 10 MB check runs. Railway/Render work too with `npm start`.
+Vercel's Hono preset finds `src/app.ts` first (it default-exports the app; `src/index.ts` is a fallback). Root Directory = `api`, everything else default, no `vercel.json`. `tsconfig.json` sets `typeRoots` because Vercel compiles through a temp tsconfig that extends ours and can't otherwise find `@types/node`. Set the same env vars in the Vercel project, and add the frontend's URL to `CORS_ORIGINS`. Vercel caps request bodies at 4.5 MB, so `/transcribe` takes at most 4 MB; anything over 4.5 MB gets Vercel's own (non-JSON) 413. Railway/Render work too with `npm start`.
 
 ## Still to do
 

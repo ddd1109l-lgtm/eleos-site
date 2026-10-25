@@ -81,6 +81,37 @@ export function sanitizeProgress(spec: FormSpec, progress: Partial<Progress> | u
   return { answers, done: [...new Set(done)] };
 }
 
+/**
+ * Answers to clientOnly gates never leave the browser. Drop them, and the done ids of fields those
+ * gates control, since a done Section 7 field would reveal the answer just as well.
+ */
+export function stripClientOnly(spec: FormSpec, progress: Partial<Progress> | undefined): Partial<Progress> {
+  const clientOnly = new Set(spec.fields.filter((f) => f.clientOnly).map((f) => f.id));
+  const dependsOnClientOnly = (c: Condition | null): boolean =>
+    c !== null && ("all" in c ? c.all.some(dependsOnClientOnly) : "any" in c ? c.any.some(dependsOnClientOnly) : clientOnly.has(c.field));
+  const controlled = new Set(spec.fields.filter((f) => dependsOnClientOnly(f.condition)).map((f) => f.id));
+  return {
+    answers: Object.fromEntries(Object.entries(progress?.answers ?? {}).filter(([id]) => !clientOnly.has(id))),
+    done: (progress?.done ?? []).filter((id) => !controlled.has(id)),
+  };
+}
+
+/**
+ * The field on screen is authoritative: return progress with whatever gate answers its condition
+ * needs, so it (and its section) count as visible even when the gate answer was stripped.
+ */
+export function assumeVisible(field: Field, progress: Progress): Progress {
+  const answers = { ...progress.answers };
+  const satisfy = (c: Condition) => {
+    if (evaluate(c, answers)) return;
+    if ("all" in c) c.all.forEach(satisfy);
+    else if ("any" in c) satisfy(c.any[0]);
+    else answers[c.field] = c.equals;
+  };
+  if (field.condition) satisfy(field.condition);
+  return { ...progress, answers };
+}
+
 export function getField(spec: FormSpec, id: string): Field | undefined {
   return spec.fields.find((f) => f.id === id);
 }
