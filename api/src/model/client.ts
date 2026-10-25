@@ -30,8 +30,9 @@ export async function complete(messages: Msg[], tools?: Tool[]) {
   return res.choices[0]?.message;
 }
 
-export async function transcribe(file: File): Promise<string> {
+/** language: a Whisper hint (en, es, vi, fr, ht); undefined lets Whisper detect it. */
+export async function transcribe(file: File, language?: string): Promise<string> {
   if (config.provider === "mock") return "What counts as income?";
-  const res = await getClient().audio.transcriptions.create({ file, model: config.sttModel, language: "en" });
+  const res = await getClient().audio.transcriptions.create({ file, model: config.sttModel, ...(language ? { language } : {}) });
   return res.text;
 }

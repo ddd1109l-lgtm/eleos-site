@@ -1,11 +1,18 @@
 import type { Field, FormSpec, Progress } from "../spec/types.js";
 import { assumeVisible, report } from "../spec/engine.js";
+import { isEnglish } from "./language.js";
 
 /**
  * Builds the system prompt. The whole spec fits, so there's no retrieval to get wrong.
  * Income limits are deliberately NOT included: the model must never judge eligibility.
  */
-export function buildSystemPrompt(spec: FormSpec, current: Field, progress: Progress, mode: "text" | "voice"): string {
+export function buildSystemPrompt(
+  spec: FormSpec,
+  current: Field,
+  progress: Progress,
+  mode: "text" | "voice",
+  language = "English",
+): string {
   // The field on screen is authoritative, even if the gate that shows it was answered only on the device.
   const r = report(spec, assumeVisible(current, progress));
   const section = spec.sections.find((s) => s.id === current.section);
@@ -69,5 +76,8 @@ ${fieldList}
 Sections: ${sectionMap}
 ${docs ? `\nDOCUMENTS FOR THIS FIELD\n${docs}\n` : ""}
 FACTS
-${knowledge}`;
+${knowledge}${isEnglish(language) ? "" : `
+
+LANGUAGE
+Reply in ${language}. When you quote words printed on the form, give the English words in quotes first so the user can find them on the paper form, then explain in ${language}.`}`;
 }

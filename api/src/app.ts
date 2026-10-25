@@ -8,6 +8,7 @@ import { filterText } from "./privacy/filter.js";
 import { ChatRequest, describeError, handleChat, HttpError } from "./chat/handler.js";
 import { transcribe } from "./model/client.js";
 import { counselors } from "./data/counselors.js";
+import { whisperLanguage } from "./chat/language.js";
 
 export const app = new Hono().basePath("/api");
 
@@ -53,7 +54,10 @@ app.post("/transcribe", async (c) => {
   if (!(audio instanceof File)) throw new HttpError(400, 'Send multipart/form-data with an "audio" file');
   // Vercel rejects bodies over 4.5 MB before we see them; 4 MB keeps our JSON error in front of that.
   if (audio.size > 4 * 1024 * 1024) throw new HttpError(413, "Audio over 4 MB");
-  const raw = await transcribe(audio);
+  // No language field: English, as before. A language we have a Whisper hint for: that hint.
+  // Anything else (e.g. "Tagalog"): no hint, so Whisper detects it instead of forcing English.
+  const language = typeof body["language"] === "string" ? body["language"] : undefined;
+  const raw = await transcribe(audio, language === undefined ? "en" : whisperLanguage(language));
   // The filter runs on the transcript, because people read numbers aloud.
   const f = filterText(raw);
   return c.json({ text: f.text, privacy: { masked: f.masked, kinds: f.kinds, notice: f.notice } });

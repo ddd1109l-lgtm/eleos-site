@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formSpec } from "../src/spec/form-1mb.js";
-import { describeError, reconcilePictureClaim, recoverTextToolCalls } from "../src/chat/handler.js";
+import { describeError, reconcileHelpClaim, reconcilePictureClaim, recoverTextToolCalls } from "../src/chat/handler.js";
 
 const field = (id: string) => formSpec.fields.find((f) => f.id === id)!;
 const ssn = field("s1_ssn");
@@ -76,6 +76,13 @@ describe("picture claims without a picture", () => {
     expect(r.actions.map((a) => a.type)).toEqual(["handoff", "show_aid"]);
   });
 
+  it("catches the claim in other languages", () => {
+    const r = reconcilePictureClaim(formSpec, gross, "Busque la línea más grande. La imagen está en la pantalla.", []);
+    expect(r.actions).toEqual([expect.objectContaining({ aidId: "doc.award_letter.before_deductions" })]);
+    const help = reconcilePictureClaim(formSpec, gross, "Trợ giúp miễn phí hiện có trên màn hình.", []);
+    expect(help.actions).toEqual([]);
+  });
+
   it("drops the sentence when the field has no aids", () => {
     const r = reconcilePictureClaim(formSpec, field("s6_other_money"), "Answer Yes or No. The picture on the screen shows the box.", []);
     expect(r.reply).toBe("Answer Yes or No.");
@@ -97,5 +104,22 @@ describe("error logging", () => {
     const line = describeError(err);
     expect(line).toBe("BadRequestError 400 invalid_request");
     expect(line).not.toContain("secret");
+  });
+});
+
+describe("free-help claims without a handoff", () => {
+  it.each([
+    "Apply even if you're not sure. Free help is now on the screen.",
+    "A counselor's number is on your screen now.",
+    "Solicite aunque no esté seguro. La ayuda gratuita está ahora en la pantalla.",
+    "Trợ giúp miễn phí hiện có trên màn hình.",
+  ])("adds the counselor card: %s", (reply) => {
+    expect(reconcileHelpClaim(formSpec, gross, reply, []).map((a) => a.type)).toEqual(["handoff"]);
+  });
+
+  it("leaves a real handoff alone, and ignores ordinary uses of help", () => {
+    const real = reconcileHelpClaim(formSpec, gross, "Free help is now on the screen.", []);
+    expect(reconcileHelpClaim(formSpec, gross, "Free help is now on the screen.", real)).toBe(real);
+    expect(reconcileHelpClaim(formSpec, gross, "The picture on the screen will help you find it.", [])).toEqual([]);
   });
 });

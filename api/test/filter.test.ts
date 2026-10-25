@@ -68,3 +68,27 @@ describe("normalizeSpokenDigits", () => {
     expect(normalizeSpokenDigits("I have two cars")).toBe("I have two cars");
   });
 });
+
+describe("spoken digits in other languages", () => {
+  it.each([
+    ["Spanish", "mi seguro social es uno dos tres, cuatro cinco, seis siete ocho nueve"],
+    ["French", "mon numéro est un deux trois quatre cinq six sept huit neuf"],
+    ["Haitian Creole", "nimewo mwen se en de twa kat senk sis sèt uit nèf"],
+    ["Vietnamese", "số của tôi là một hai ba bốn năm sáu bảy tám chín"],
+    ["Vietnamese, decomposed accents", "một hai ba bốn năm sáu bảy tám chín".normalize("NFD")],
+    ["Spanish words mixed with digits", "es 1 2 3 cuatro cinco 6 7 ocho 9"],
+  ])("masks a 9-digit number read out in %s", (_lang, s) => {
+    const r = filterText(s);
+    expect(r.masked).toBe(true);
+    expect(r.text).toContain("[SSN removed]");
+  });
+
+  it.each([
+    "Tengo dos o tres cartas del Seguro Social",
+    "Il y a un ou deux documents de la banque",
+    "Năm nay tôi có hai con và ba cháu",
+    "Mwen gen de oswa twa lèt",
+  ])("leaves everyday sentences alone: %s", (s) => {
+    expect(filterText(s)).toMatchObject({ masked: false, text: s });
+  });
+});

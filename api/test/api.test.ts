@@ -87,6 +87,13 @@ describe("API (mock model)", () => {
     log.mockRestore();
   });
 
+  it("chat accepts a language, and rejects one over 60 characters", async () => {
+    const ok = await post("/chat", { fieldId: "s6_gross_amount", language: "Spanish", messages: [{ role: "user", content: "¿Dónde encuentro esto?" }] });
+    expect(ok.status).toBe(200);
+    const long = await post("/chat", { fieldId: "s6_gross_amount", language: "x".repeat(61), messages: [{ role: "user", content: "hi" }] });
+    expect(long.status).toBe(400);
+  });
+
   it("rejects unknown fields", async () => {
     const r = await post("/chat", { fieldId: "nope", messages: [{ role: "user", content: "hi" }] });
     expect(r.status).toBe(400);

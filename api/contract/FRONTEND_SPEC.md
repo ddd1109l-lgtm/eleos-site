@@ -168,6 +168,9 @@ type ChatRequest = {
   progress: Progress;                 // after stripClientOnly(spec, progress)
   messages: { role: "user" | "assistant"; content: string }[];  // last item must be the user's; max 30
   mode?: "text" | "voice";            // voice = shorter, speakable replies
+  language?: string;                  // reply language as the user named it ("Spanish", "Tiếng Việt"); default "English", max 60 chars.
+                                      // Letters, spaces, hyphens, apostrophes and parentheses only, up to 4 words; anything else gets English.
+                                      // Replies quote the form's printed English words first, then explain in this language.
 };
 type Aid = { id: string; image: string; box: { x: number; y: number; w: number; h: number };
              spoken: string; caption: string; placeholder: boolean };
@@ -185,6 +188,9 @@ type ChatResponse = {
 };
 
 // POST /transcribe   multipart/form-data, field "audio" (<= 4 MB; the 30s mic limit stays well under it)
+//                   optional field "language": a code or name. en, es, vi, fr, ht (or e.g. "Spanish", "Español",
+//                   "Tiếng Việt", "Français", "Kreyòl") become a speech-recognition hint; any other value means
+//                   auto-detect; leaving it out means English.
 type TranscribeResponse = { text: string; privacy: { masked: boolean; kinds: string[]; notice: string | null } };
 
 // POST /filter   body: { text: string }  -> { text, masked, kinds, notice }

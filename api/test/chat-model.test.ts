@@ -57,6 +57,28 @@ describe("/chat with the model path (stubbed client)", () => {
     expect(progress.done).toEqual(["s6_gross_amount"]);
   });
 
+  it("passes the reply language into the system prompt", async () => {
+    await chat({ fieldId: "s6_gross_amount", language: "Spanish", messages: [{ role: "user", content: "¿Dónde encuentro esto?" }] });
+    expect(complete.mock.calls[0][0][0].content).toContain("Reply in Spanish.");
+  });
+
+  it("sends Whisper a language hint only for en, es, vi, fr, ht", async () => {
+    const { transcribe } = await import("../src/model/client.js");
+    const hint = async (language?: string) => {
+      const fd = new FormData();
+      fd.append("audio", new File([new Uint8Array(10)], "clip.webm", { type: "audio/webm" }));
+      if (language !== undefined) fd.append("language", language);
+      (transcribe as unknown as ReturnType<typeof vi.fn>).mockClear();
+      await app.request("/api/transcribe", { method: "POST", body: fd });
+      return (transcribe as unknown as ReturnType<typeof vi.fn>).mock.calls[0][1];
+    };
+    expect(await hint()).toBe("en");
+    expect(await hint("es")).toBe("es");
+    expect(await hint("Spanish")).toBe("es");
+    expect(await hint("Kreyòl")).toBe("ht");
+    expect(await hint("Tagalog")).toBeUndefined();
+  });
+
   it("logs a model failure without the user's words", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     complete.mockRejectedValueOnce(Object.assign(new Error('400 bad request near "my secret words"'), { name: "BadRequestError", status: 400 }));

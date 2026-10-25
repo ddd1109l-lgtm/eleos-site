@@ -35,11 +35,25 @@ const LOOSE_NINE = /(?<!\d)(?:\d[\s.-]?){8}\d(?![\d])/g;
 
 const ZIP4 = /^\d{5}-\d{4}$/;
 
+// Digit words in the app's languages: English, Spanish, French, Haitian Creole, Vietnamese.
+// Words that are also everyday words ("to", "un", "ba" = father, "năm" = year) are left out of
+// STRICT_DIGIT_WORDS, so they only count inside a run that is clearly a number.
 const WORD_DIGITS: Record<string, string> = {
   zero: "0", oh: "0", o: "0", one: "1", two: "2", to: "2", too: "2", three: "3", four: "4", for: "4",
   five: "5", six: "6", seven: "7", eight: "8", nine: "9",
+  cero: "0", uno: "1", una: "1", dos: "2", tres: "3", cuatro: "4", cinco: "5", seis: "6", siete: "7", ocho: "8", nueve: "9",
+  "zéro": "0", un: "1", une: "1", deux: "2", trois: "3", quatre: "4", cinq: "5", sept: "7", huit: "8", neuf: "9",
+  zewo: "0", en: "1", de: "2", twa: "3", kat: "4", senk: "5", sis: "6", "sèt": "7", uit: "8", "nèf": "9",
+  "không": "0", "một": "1", hai: "2", ba: "3", "bốn": "4", "năm": "5", "sáu": "6", "bảy": "7", "tám": "8", "chín": "9",
 };
-const STRICT_DIGIT_WORDS = new Set(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]);
+const STRICT_DIGIT_WORDS = new Set([
+  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+  "cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve",
+  "zéro", "deux", "trois", "quatre", "cinq", "sept", "huit",
+  "zewo", "twa", "kat", "senk", "sis", "sèt", "uit", "nèf",
+  "hai", "bốn", "sáu", "bảy", "tám", "chín",
+]);
+const digitKey = (t: string) => t.normalize("NFC").toLowerCase();
 
 /**
  * Voice transcripts sometimes spell numbers out ("one two three four five ..."). Convert runs of
@@ -48,7 +62,7 @@ const STRICT_DIGIT_WORDS = new Set(["zero", "one", "two", "three", "four", "five
  */
 export function normalizeSpokenDigits(text: string): string {
   const tokens = text.split(/(\s+|,|-)/);
-  const isWord = (t: string) => WORD_DIGITS[t.toLowerCase()] !== undefined || /^\d$/.test(t);
+  const isWord = (t: string) => WORD_DIGITS[digitKey(t)] !== undefined || /^\d$/.test(t);
   const out: string[] = [];
   let i = 0;
   while (i < tokens.length) {
@@ -59,9 +73,9 @@ export function normalizeSpokenDigits(text: string): string {
       if (isWord(tokens[j])) run.push(tokens[j]);
       j++;
     }
-    const strict = run.filter((t) => STRICT_DIGIT_WORDS.has(t.toLowerCase()) || /^\d$/.test(t)).length;
+    const strict = run.filter((t) => STRICT_DIGIT_WORDS.has(digitKey(t)) || /^\d$/.test(t)).length;
     if (strict >= 4) {
-      out.push(run.map((t) => WORD_DIGITS[t.toLowerCase()] ?? t).join("") + " ");
+      out.push(run.map((t) => WORD_DIGITS[digitKey(t)] ?? t).join("") + " ");
     } else {
       out.push(...tokens.slice(i, j));
     }

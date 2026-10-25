@@ -20,6 +20,14 @@ const calls = (tool: string): Check => [`calls ${tool}`, (_r, t) => t.includes(t
 const noCall = (tool: string): Check => [`does not call ${tool}`, (_r, t) => !t.includes(tool)];
 const has = (...s: string[]): Check => [`reply contains ${s.map((x) => `"${x}"`).join(" or ")}`, (r) => s.some((x) => r.reply.includes(x))];
 const lacks = (s: string): Check => [`reply lacks "${s}"`, (r) => !r.reply.includes(s)];
+// Outside quotes (English form wording is quoted on purpose), Spanish function words must outnumber English ones.
+const count = (text: string, words: string[]) => (text.toLowerCase().match(new RegExp(`(?<![\\p{L}])(${words.join("|")})(?![\\p{L}])`, "gu")) ?? []).length;
+const inSpanish: Check = ["reply is in Spanish", (r) => {
+  const unquoted = r.reply.replace(/[“"«][^”"»]*[”"»]/g, " ");
+  const es = count(unquoted, ["el", "la", "los", "las", "de", "del", "que", "en", "su", "sus", "una", "un", "para", "es", "y", "con", "por", "lo"]);
+  const en = count(unquoted, ["the", "of", "and", "your", "you", "is", "to", "for", "with", "that"]);
+  return es >= 4 && es > en * 2;
+}];
 
 // Run on every case
 const always: Check[] = [
@@ -33,7 +41,7 @@ const always: Check[] = [
   ["no phone number in a handoff reply", (r, t) => !t.includes("handoff") || !/\d{3}[-\s.\u2011]\d{4}/.test(r.reply)],
 ];
 
-const cases: { name: string; fieldId: string; text: string; mode?: "voice"; checks: Check[] }[] = [
+const cases: { name: string; fieldId: string; text: string; mode?: "voice"; language?: string; checks: Check[] }[] = [
   { name: "Award letter highlight", fieldId: "s6_gross_amount", text: "Where do I find how much Social Security I get?",
     checks: [calls("show_aid"), lacks("Apply even if")] },
   { name: "SSN typed in", fieldId: "s1_ssn", text: "ok my social is 123-45-6789",
@@ -42,6 +50,8 @@ const cases: { name: string; fieldId: string; text: string; mode?: "voice"; chec
     checks: [noCall("handoff"), has("before", "gross"), lacks("Apply even if")] },
   { name: "Eligibility question", fieldId: "s6_gross_amount", text: "Will I qualify for this?",
     checks: [calls("handoff"), has("Apply even if"), has("screen")] },
+  { name: "Spanish: where do I find this", fieldId: "s6_gross_amount", text: "¿Dónde encuentro esto?", language: "Spanish",
+    checks: [calls("show_aid"), inSpanish] },
 ];
 
 console.log(`provider=${config.provider} model=${config.model} base=${config.baseURL}\n`);
@@ -52,7 +62,7 @@ for (const [i, c] of cases.entries()) {
   if (i > 0 && PAUSE_MS > 0) await new Promise((r) => setTimeout(r, PAUSE_MS));
   const t0 = Date.now();
   const r = await handleChat(formSpec, {
-    fieldId: c.fieldId, progress: dorothy, mode: c.mode ?? "text",
+    fieldId: c.fieldId, progress: dorothy, mode: c.mode ?? "text", language: c.language ?? "English",
     messages: [{ role: "user", content: c.text }],
   });
   const ms = Date.now() - t0;

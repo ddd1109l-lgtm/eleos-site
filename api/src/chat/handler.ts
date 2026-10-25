@@ -6,6 +6,7 @@ import { filterText, type FindingKind } from "../privacy/filter.js";
 import { getField, sanitizeProgress, stripClientOnly } from "../spec/engine.js";
 import type { Field, FormSpec } from "../spec/types.js";
 import { buildSystemPrompt } from "./prompt.js";
+import { normalizeLanguage } from "./language.js";
 import { toolDefinitions, validateToolCall, type Action, type Rejected } from "./tools.js";
 import { counselors } from "../data/counselors.js";
 
@@ -17,6 +18,8 @@ export const ChatRequest = z.object({
   }).default({ answers: {}, done: [] }),
   messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(2000) })).min(1).max(30),
   mode: z.enum(["text", "voice"]).default("text"),
+  /** Reply language, as the user typed it ("Spanish", "Tiếng Việt"). Cleaned before it reaches the prompt. */
+  language: z.string().max(60).default("English"),
 });
 export type ChatRequest = z.infer<typeof ChatRequest>;
 
@@ -58,7 +61,7 @@ export async function handleChat(spec: FormSpec, req: ChatRequest): Promise<Chat
     ({ reply, actions } = mockReply(spec, field, last.text, last.masked));
   } else {
     try {
-      ({ reply, actions, rejected } = await runModel(spec, field, progress, filtered, req.mode));
+      ({ reply, actions, rejected } = await runModel(spec, field, progress, filtered, req.mode, normalizeLanguage(req.language)));
     } catch (err) {
       console.error("[chat] model error:", describeError(err));
       degraded = true;
@@ -67,8 +70,9 @@ export async function handleChat(spec: FormSpec, req: ChatRequest): Promise<Chat
     }
   }
 
-  // 3. A reply that says a picture is on the screen must come with one.
+  // 3. A reply that says a picture, or free help, is on the screen must come with one.
   ({ reply, actions } = reconcilePictureClaim(spec, field, reply, actions));
+  actions = reconcileHelpClaim(spec, field, reply, actions);
 
   // 4. Filter the model's output too, and never let it echo masking tokens back as if they were data.
   reply = filterText(reply).text;
@@ -90,9 +94,10 @@ async function runModel(
   progress: ReturnType<typeof sanitizeProgress>,
   history: { role: "user" | "assistant"; text: string }[],
   mode: "text" | "voice",
+  language: string,
 ) {
   const messages: Msg[] = [
-    { role: "system", content: buildSystemPrompt(spec, field, progress, mode) },
+    { role: "system", content: buildSystemPrompt(spec, field, progress, mode, language) },
     ...history.slice(-12).map((m) => ({ role: m.role, content: m.text }) as Msg),
   ];
   const actions: Action[] = [];
@@ -163,7 +168,14 @@ export function recoverTextToolCalls(spec: FormSpec, field: Field, text: string)
   return { text: tidy(out), actions, rejected };
 }
 
-const PICTURE_ON_SCREEN = /\b(picture|image|photo|highlight\w*)\b[^.!?\n]*\bscreen\b|\bscreen\b[^.!?\n]*\b(picture|image|photo|highlight\w*)\b/i;
+// "Picture" and "screen" in the same sentence, in any of the app's languages (en, es, fr, ht, vi).
+const PICTURE_WORDS = String.raw`picture|image|photo|highlight\p{L}*|imagen|foto|resaltad\p{L}*|imaj|hình ảnh|ảnh`;
+const SCREEN_WORDS = String.raw`screen|pantalla|écran|ekran|màn hình`;
+const word = (alts: string) => String.raw`(?<!\p{L})(?:${alts})(?!\p{L})`;
+const PICTURE_ON_SCREEN = new RegExp(
+  `${word(PICTURE_WORDS)}[^.!?\\n]*${word(SCREEN_WORDS)}|${word(SCREEN_WORDS)}[^.!?\\n]*${word(PICTURE_WORDS)}`,
+  "iu",
+);
 
 /** What the aid viewer opens by default: the first doc.* aid, else the form.* aid. */
 export function defaultAidId(field: Field): string | undefined {
@@ -187,6 +199,20 @@ export function reconcilePictureClaim(spec: FormSpec, field: Field, reply: strin
 
 function tidy(text: string): string {
   return text.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ").trim();
+}
+
+// "Free help" / "counselor" and "screen" in the same sentence. Narrow on purpose: "this will help you" doesn't count.
+const HELP_WORDS = String.raw`free help|counsel(?:or|ing)\p{L}*|ayuda gratuita|ayuda gratis|consejer\p{L}*|aide gratuite|conseiller\p{L}*|èd gratis|konseye|trợ giúp miễn phí|tư vấn`;
+const HELP_ON_SCREEN = new RegExp(
+  `${word(HELP_WORDS)}[^.!?\\n]*${word(SCREEN_WORDS)}|${word(SCREEN_WORDS)}[^.!?\\n]*${word(HELP_WORDS)}`,
+  "iu",
+);
+
+/** "Free help is now on the screen" without a handoff call would leave the user waiting for a card that never opens. */
+export function reconcileHelpClaim(spec: FormSpec, field: Field, reply: string, actions: Action[]): Action[] {
+  if (actions.some((a) => a.type === "handoff") || !HELP_ON_SCREEN.test(reply)) return actions;
+  const v = validateToolCall(spec, field, "handoff", JSON.stringify({ reason: "other" }));
+  return v.ok ? [...actions, v.action] : actions;
 }
 
 /**
