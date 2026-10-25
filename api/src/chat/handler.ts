@@ -150,6 +150,9 @@ async function runModel(
     const msg = await complete(messages, round < 2 ? toolsFor(field) : undefined);
     if (!msg) throw new Error("empty completion");
     const calls = msg.tool_calls ?? [];
+    // gpt-oss sometimes stops after reasoning with no text and no tool call (about 1 in 8 in testing).
+    // Ask again rather than falling back to the English field explanation.
+    if (calls.length === 0 && !(msg.content ?? "").trim() && round < 2) continue;
     if (calls.length === 0) return finish(msg.content);
     messages.push({ role: "assistant", content: msg.content ?? "", tool_calls: calls });
     for (const call of calls) {

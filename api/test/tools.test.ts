@@ -41,12 +41,16 @@ describe("system prompt", () => {
 
 describe("reply language", () => {
   const dorothy = { answers: { s6_other_money: "yes" as const }, done: [] };
-  const LINE = "When you quote words printed on the form, give the English words in quotes first";
+  const LINE = "give those English words in quotes first";
 
   it("adds the language instruction only when it isn't English", () => {
     const es = buildSystemPrompt(formSpec, field("s6_gross_amount"), dorothy, "text", "Spanish");
-    expect(es).toContain("Reply in Spanish.");
-    expect(es).toContain(`${LINE} so the user can find them on the paper form, then explain in Spanish.`);
+    expect(es).toContain('Reply in Spanish. Always address the user as "usted" (formal), never "tú".');
+    expect(es).toContain("Quote English words only when they are printed on the paper form (the field labels)");
+    expect(es).toContain("Name the user's documents only in Spanish, never by their English names.");
+    const vi = buildSystemPrompt(formSpec, field("s6_gross_amount"), dorothy, "text", "Vietnamese");
+    expect(vi).toContain("Reply in Vietnamese. Quote English words only");
+    expect(vi).not.toContain('"usted" (formal)');
     for (const en of ["English", "english", "en", "English (US)"]) {
       expect(buildSystemPrompt(formSpec, field("s6_gross_amount"), dorothy, "text", en)).not.toContain(LINE);
     }

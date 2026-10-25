@@ -149,6 +149,13 @@ describe("/chat with the model path (stubbed client)", () => {
     expect(r.privacy.notice).toMatch(/^Vous n'avez pas besoin de me donner votre numéro de Sécurité sociale/);
   });
 
+  it("asks again when the model stops with no text and no tool call", async () => {
+    complete.mockResolvedValueOnce(text("")).mockResolvedValueOnce(text("Busque la cifra más alta en su carta."));
+    const r = await (await chat({ fieldId: "s6_gross_amount", language: "Spanish", messages: [{ role: "user", content: "¿Dónde?" }] })).json();
+    expect(complete).toHaveBeenCalledTimes(2);
+    expect(r.reply).toBe("Busque la cifra más alta en su carta.");
+  });
+
   it("logs a model failure without the user's words", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     complete.mockRejectedValueOnce(Object.assign(new Error('400 bad request near "my secret words"'), { name: "BadRequestError", status: 400 }));

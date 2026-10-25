@@ -1,6 +1,6 @@
 import type { Field, FormSpec, Progress } from "../spec/types.js";
 import { assumeVisible, report } from "../spec/engine.js";
-import { isEnglish } from "./language.js";
+import { isEnglish, languageCode } from "./language.js";
 
 /**
  * Builds the system prompt. The whole spec fits, so there's no retrieval to get wrong.
@@ -85,5 +85,5 @@ FACTS
 ${knowledge}${isEnglish(language) ? "" : `
 
 LANGUAGE
-Reply in ${language}. When you quote words printed on the form, give the English words in quotes first so the user can find them on the paper form, then explain in ${language}.`}`;
+Reply in ${language}.${languageCode(language) === "es" ? ` Always address the user as "usted" (formal), never "tú".` : ""} Quote English words only when they are printed on the paper form (the field labels): give those English words in quotes first so the user can find them on the paper form, then explain in ${language}. Name the user's documents only in ${language}, never by their English names.`}`;
 }

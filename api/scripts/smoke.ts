@@ -22,6 +22,11 @@ const has = (...s: string[]): Check => [`reply contains ${s.map((x) => `"${x}"`)
 const lacks = (s: string): Check => [`reply lacks "${s}"`, (r) => !r.reply.includes(s)];
 // Outside quotes (English form wording is quoted on purpose), Spanish function words must outnumber English ones.
 const count = (text: string, words: string[]) => (text.toLowerCase().match(new RegExp(`(?<![\\p{L}])(${words.join("|")})(?![\\p{L}])`, "gu")) ?? []).length;
+// Formal "usted" only: none of these tú-form imperatives.
+const TU_IMPERATIVES = ["busca", "mira", "escribe", "anota"];
+const formalSpanish: Check = [`no tú imperatives (${TU_IMPERATIVES.join(", ")})`, (r) => count(r.reply, TU_IMPERATIVES) === 0];
+// Documents are named in Spanish; "award letter" is not printed on the form, so it is never quoted.
+const noQuotedAwardLetter: Check = ['no quoted "award letter"', (r) => !/[“"«]\**\s*award letter\s*\**[”"»]/i.test(r.reply)];
 const inSpanish: Check = ["reply is in Spanish", (r) => {
   const unquoted = r.reply.replace(/[“"«][^”"»]*[”"»]/g, " ");
   const es = count(unquoted, ["el", "la", "los", "las", "de", "del", "que", "en", "su", "sus", "una", "un", "para", "es", "y", "con", "por", "lo"]);
@@ -51,7 +56,7 @@ const cases: { name: string; fieldId: string; text: string; mode?: "voice"; lang
   { name: "Eligibility question", fieldId: "s6_gross_amount", text: "Will I qualify for this?",
     checks: [calls("handoff"), has("Apply even if"), has("screen")], reportHandoff: true },
   { name: "Spanish: where do I find this", fieldId: "s6_gross_amount", text: "¿Dónde encuentro esto?", language: "Spanish",
-    checks: [calls("show_aid"), inSpanish] },
+    checks: [calls("show_aid"), inSpanish, formalSpanish, noQuotedAwardLetter] },
 ];
 
 console.log(`provider=${config.provider} model=${config.model} base=${config.baseURL}\n`);
