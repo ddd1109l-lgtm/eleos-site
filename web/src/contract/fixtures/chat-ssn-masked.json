@@ -11,5 +11,6 @@
   "userMessage": "it's [SSN removed]",
   "fieldId": "s1_ssn",
   "degraded": false,
-  "rejected": []
+  "rejected": [],
+  "addedByCode": []
 }

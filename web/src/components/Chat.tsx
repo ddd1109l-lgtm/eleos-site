@@ -166,6 +166,7 @@ export default function Chat({ fieldId, localFieldId, progress, pending, onPerso
       try {
         const form = new FormData();
         form.append("audio", blob, "voice.webm");
+        form.append("language", lang.name);
         const res = await fetch(`${API_URL}/transcribe`, { method: "POST", body: form });
         // 413 from Vercel is not JSON; any unparseable body gets the standard message.
         const data = (await res.json().catch(() => null)) as { text?: string } | null;
