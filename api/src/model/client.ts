@@ -9,7 +9,7 @@ let client: OpenAI | null = null;
 
 export function getClient(): OpenAI {
   if (config.provider === "mock") throw new Error("getClient() called in mock mode");
-  client ??= new OpenAI({ baseURL: config.baseURL, apiKey: config.apiKey, timeout: 30_000, maxRetries: 1 });
+  client ??= new OpenAI({ baseURL: config.baseURL, apiKey: config.apiKey, timeout: 30_000, maxRetries: 2 });
   return client;
 }
 

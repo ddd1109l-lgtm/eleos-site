@@ -99,23 +99,72 @@ async function runModel(
     const msg = await complete(messages, round < 2 ? toolDefinitions : undefined);
     if (!msg) throw new Error("empty completion");
     const calls = msg.tool_calls ?? [];
-    if (calls.length === 0) {
-      return { reply: (msg.content ?? "").trim() || field.plain, actions, rejected };
-    }
+    if (calls.length === 0) return finish(msg.content);
     messages.push({ role: "assistant", content: msg.content ?? "", tool_calls: calls });
     for (const call of calls) {
       if (call.type !== "function") continue;
       const v = validateToolCall(spec, field, call.function.name, call.function.arguments);
-      if (v.ok) {
-        // one card per kind is enough
-        if (!actions.some((a) => a.type === v.action.type && (a.type !== "show_aid" || a.aidId === (v.action as any).aidId))) {
-          actions.push(v.action);
-        }
-      } else rejected.push(v.rejected);
+      if (v.ok) addAction(actions, v.action);
+      else rejected.push(v.rejected);
       messages.push({ role: "tool", tool_call_id: call.id, content: v.result });
     }
+    // The model already said something alongside its tool calls: use it, skip the second round trip.
+    if (round === 0 && (msg.content ?? "").trim()) return finish(msg.content);
   }
-  return { reply: field.plain, actions, rejected };
+  return finish(null);
+
+  function finish(content: string | null | undefined) {
+    const recovered = recoverTextToolCalls(spec, field, content ?? "");
+    for (const a of recovered.actions) addAction(actions, a);
+    rejected.push(...recovered.rejected);
+    return { reply: recovered.text || field.plain, actions, rejected };
+  }
+}
+
+/** One card per kind is enough (one per aid for show_aid). */
+function addAction(actions: Action[], action: Action) {
+  if (!actions.some((a) => a.type === action.type && (a.type !== "show_aid" || a.aidId === (action as any).aidId))) {
+    actions.push(action);
+  }
+}
+
+const TOOL_NAMES = "show_aid|handoff";
+const TEXT_TOOL_PATTERNS: RegExp[] = [
+  // [show_aid aid_id="X"]  **[show_aid]** {"aid_id":"X"}  [handoff reason="stuck"]
+  new RegExp(String.raw`\*{0,2}\[\s*(${TOOL_NAMES})\b([^\]]*)\]\*{0,2}(?:\s*(\{[^{}]*\}))?`, "g"),
+  // show_aid(aid_id="X")  handoff({"reason":"stuck"})
+  new RegExp(String.raw`\b(${TOOL_NAMES})\s*\(([^()]*)\)`, "g"),
+  // bare {"aid_id":"X"} or {"reason":"stuck"}
+  /(\{\s*"(aid_id|reason)"\s*:\s*"[^"]*"\s*\})/g,
+];
+
+/**
+ * Models sometimes write a tool call into the reply instead of calling it. Pull those out of the
+ * text and validate them exactly like real calls, so the user never sees raw markup.
+ */
+export function recoverTextToolCalls(spec: FormSpec, field: Field, text: string): { text: string; actions: Action[]; rejected: Rejected[] } {
+  const actions: Action[] = [];
+  const rejected: Rejected[] = [];
+  const take = (name: string, rawArgs: string) => {
+    const v = validateToolCall(spec, field, name, JSON.stringify(parseLooseArgs(rawArgs)));
+    if (v.ok) addAction(actions, v.action);
+    else rejected.push(v.rejected);
+    return " ";
+  };
+
+  let out = text.replace(TEXT_TOOL_PATTERNS[0], (_m, name: string, inner: string, json?: string) => take(name, `${inner} ${json ?? ""}`));
+  out = out.replace(TEXT_TOOL_PATTERNS[1], (_m, name: string, inner: string) => take(name, inner));
+  out = out.replace(TEXT_TOOL_PATTERNS[2], (_m, json: string, key: string) => take(key === "aid_id" ? "show_aid" : "handoff", json));
+
+  out = out.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ").trim();
+  return { text: out, actions, rejected };
+}
+
+/** Accepts aid_id="X", aid_id: 'X', {"aid_id":"X"} and mixes of them. */
+function parseLooseArgs(raw: string): Record<string, string> {
+  const args: Record<string, string> = {};
+  for (const m of raw.matchAll(/"?(aid_id|reason)"?\s*[:=]\s*["']([^"']*)["']/g)) args[m[1]] = m[2];
+  return args;
 }
 
 /** Offline stand-in so the frontend can integrate before anyone has an API key. */

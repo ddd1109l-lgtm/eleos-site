@@ -9,12 +9,20 @@ export function buildSystemPrompt(spec: FormSpec, current: Field, progress: Prog
   const r = report(spec, progress);
   const section = spec.sections.find((s) => s.id === current.section);
 
+  // Only the current section's fields, plus a one-line map of every section, to keep the prompt small.
   const fieldList = spec.fields
-    .filter((f) => r.statuses[f.id] !== "hidden")
+    .filter((f) => f.section === current.section && r.statuses[f.id] !== "hidden")
     .map((f) => `- ${f.id} [${r.statuses[f.id]}${f.required ? "" : ", optional"}${f.sensitive !== "none" ? `, sensitive:${f.sensitive}` : ""}] ${f.label}`)
     .join("\n");
 
-  const docs = spec.documents.map((d) => `- ${d.id}: ${d.name}. ${d.whatItLooksLike}`).join("\n");
+  const sectionMap = r.sections
+    .map((rs) => `${spec.sections.find((s) => s.id === rs.id)?.title ?? rs.id} (${rs.status})`)
+    .join("; ");
+
+  const docs = spec.documents
+    .filter((d) => current.sourceDocs.includes(d.id))
+    .map((d) => `- ${d.id}: ${d.name}. ${d.whatItLooksLike}`)
+    .join("\n");
   const knowledge = spec.knowledge.map((k) => `- (${k.id}) ${k.text}`).join("\n");
 
   const currentBlock = [
@@ -43,7 +51,7 @@ HOW TO HELP
 - Stay on the CURRENT FIELD unless the user asks about something else on the form.
 - When pointing to a document or a spot on the form would help, call show_aid with one of the aid ids listed for the current field. Do not invent aid ids.
 - Call handoff when the user is stuck, can't read their documents, asks about eligibility, or asks something the spec doesn't answer.
-- Any question about qualifying, being eligible, getting approved, or how much help they'd get ("Will I qualify?", "Am I eligible?") ALWAYS gets a handoff tool call in the same reply, plus the words "Apply even if you're not sure." Offering a counselor in words alone is not enough: you must call handoff.
+- Only when the user directly asks whether they qualify, will be approved, how much they'll get, or which program they fit: call handoff with reason eligibility_question and say "Apply even if you're not sure." Questions about what a form field means, including what counts as income, are NOT eligibility questions. Answer them from the FACTS. For example, "what counts as income?" gets the gross amount explained in your own words (the full amount before anything is taken out, from the (gross) fact and the current field's plain explanation), with no handoff and no "Apply even if".
 - You cannot mark fields done or move to the next field. The user taps "Done" in the app when they've written the answer.
 - ${current.sensitive === "health" ? "This field is in Section 7 (health). Explain only what the form asks. Do not ask about or discuss the person's care, conditions or bills." : "Keep it brief."}
 - ${mode === "voice" ? "VOICE MODE: your reply is read aloud. 2 to 3 short sentences, no lists, no symbols, spell out what the user should look for." : "Text mode: at most 4 short sentences. A short list is fine if it truly helps."}
@@ -53,12 +61,10 @@ ${currentBlock}
 
 PROGRESS: ${r.requiredDone} of ${r.requiredTotal} required items done.
 
-FORM SPEC (fields that apply to this person, in order)
+FORM SPEC (fields in this section that apply to this person, in order)
 ${fieldList}
-
-DOCUMENTS THE PERSON MAY HAVE
-${docs}
-
+Sections: ${sectionMap}
+${docs ? `\nDOCUMENTS FOR THIS FIELD\n${docs}\n` : ""}
 FACTS
 ${knowledge}`;
 }
