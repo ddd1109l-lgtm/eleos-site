@@ -28,6 +28,7 @@ const always: Check[] = [
   lacks("show_aid"),
   lacks("aid_id"),
   // The app shows the counselor card; the model must not write its own (possibly wrong) numbers.
+  ...["icon", "menu", "click here", "tap the"].map((s) => [`reply lacks "${s}" (case-insensitive)`, (r: Result) => !r.reply.toLowerCase().includes(s)] as Check),
   ["no phone number in a handoff reply", (r, t) => !t.includes("handoff") || !/\d{3}[-\s.\u2011]\d{4}/.test(r.reply)],
 ];
 
@@ -39,7 +40,7 @@ const cases: { name: string; fieldId: string; text: string; mode?: "voice"; chec
   { name: "What counts as income (voice)", fieldId: "s6_gross_amount", text: "what counts as income", mode: "voice",
     checks: [noCall("handoff"), has("before", "gross"), lacks("Apply even if")] },
   { name: "Eligibility question", fieldId: "s6_gross_amount", text: "Will I qualify for this?",
-    checks: [calls("handoff"), has("Apply even if")] },
+    checks: [calls("handoff"), has("Apply even if"), has("screen")] },
 ];
 
 console.log(`provider=${config.provider} model=${config.model} base=${config.baseURL}\n`);
