@@ -1,0 +1,33 @@
+{
+  "name": "medicare-guide-api",
+  "version": "1.0.0",
+  "description": "Backend for the Medicare Enrollment Guide (Freeman AI Innovation Challenge)",
+  "scripts": {
+    "dev": "tsx watch src/dev.ts",
+    "start": "tsx src/dev.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "smoke": "tsx scripts/smoke.ts",
+    "contract": "tsx scripts/export-contract.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hono/node-server": "^2.1.5",
+    "dotenv": "^18.0.9",
+    "hono": "^4.13.14",
+    "openai": "^7.43.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}

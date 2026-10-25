@@ -1,0 +1,137 @@
+{
+  "progress": {
+    "answers": {
+      "s2_home_different": "no",
+      "s3_married_living_together": "no",
+      "s5_anyone_works": "no",
+      "s6_other_money": "yes"
+    },
+    "done": [
+      "cover_language",
+      "s1_name",
+      "s1_ssn",
+      "s1_dob",
+      "s1_sex",
+      "s1_marital_status",
+      "s2_mailing_address",
+      "s2_parish",
+      "s2_phones",
+      "s4_medicare_number",
+      "s4_other_insurance",
+      "s6_who_receives",
+      "s6_source"
+    ]
+  },
+  "nextFieldId": "s1_hispanic",
+  "complete": false,
+  "requiredDone": 17,
+  "requiredTotal": 34,
+  "statuses": {
+    "cover_language": "done",
+    "s1_name": "done",
+    "s1_ssn": "done",
+    "s1_dob": "done",
+    "s1_sex": "done",
+    "s1_marital_status": "done",
+    "s1_hispanic": "todo",
+    "s1_race": "todo",
+    "s2_mailing_address": "done",
+    "s2_home_different": "done",
+    "s2_home_address": "hidden",
+    "s2_email": "todo",
+    "s2_parish": "done",
+    "s2_phones": "done",
+    "s3_married_living_together": "done",
+    "s3_spouse_name": "hidden",
+    "s3_spouse_ssn": "hidden",
+    "s3_spouse_dob": "hidden",
+    "s3_spouse_sex": "hidden",
+    "s3_spouse_hispanic": "hidden",
+    "s3_spouse_race": "hidden",
+    "s3_spouse_applying": "hidden",
+    "s4_medicare_number": "done",
+    "s4_other_insurance": "done",
+    "s4_spouse_medicare_number": "hidden",
+    "s4_spouse_other_insurance": "hidden",
+    "s5_anyone_works": "done",
+    "s5_worker_name": "hidden",
+    "s5_employer_name": "hidden",
+    "s5_employer_phone": "hidden",
+    "s5_self_employed": "hidden",
+    "s5_gross_pay": "hidden",
+    "s5_pay_frequency": "hidden",
+    "s6_other_money": "done",
+    "s6_who_receives": "done",
+    "s6_source": "done",
+    "s6_gross_amount": "todo",
+    "s6_frequency": "todo",
+    "s7_medical_bills": "todo",
+    "s7_who_received_care": "hidden",
+    "s7_provider": "hidden",
+    "s7_provider_phone": "hidden",
+    "s7_dates": "hidden",
+    "s7_total_cost": "hidden",
+    "s8_checking": "todo",
+    "s8_savings": "todo",
+    "s8_direct_express": "todo",
+    "s8_vehicle": "todo",
+    "s8_other_vehicles": "todo",
+    "s8_other_property": "todo",
+    "s8_cd": "todo",
+    "s8_investments": "todo",
+    "s8_life_burial_insurance": "todo",
+    "s8_burial_funds": "todo",
+    "s8_safe_deposit": "todo",
+    "s8_other": "todo",
+    "rights_read": "todo",
+    "sign_applicant": "todo",
+    "sign_spouse": "hidden",
+    "sign_comments": "todo"
+  },
+  "sections": [
+    {
+      "id": "cover",
+      "status": "done"
+    },
+    {
+      "id": "s1",
+      "status": "in_progress"
+    },
+    {
+      "id": "s2",
+      "status": "in_progress"
+    },
+    {
+      "id": "s3",
+      "status": "skipped"
+    },
+    {
+      "id": "s4",
+      "status": "done"
+    },
+    {
+      "id": "s5",
+      "status": "skipped"
+    },
+    {
+      "id": "s6",
+      "status": "in_progress"
+    },
+    {
+      "id": "s7",
+      "status": "todo"
+    },
+    {
+      "id": "s8",
+      "status": "todo"
+    },
+    {
+      "id": "rights",
+      "status": "todo"
+    },
+    {
+      "id": "sign",
+      "status": "todo"
+    }
+  ]
+}

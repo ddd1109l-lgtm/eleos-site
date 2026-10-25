@@ -1,0 +1,23 @@
+[
+  {
+    "id": "laship",
+    "name": "LaSHIP (Louisiana Senior Health Insurance Information Program)",
+    "phone": "1-800-259-5300",
+    "web": "ldi.la.gov/LaSHIP",
+    "why": "Free, confidential Medicare counselors who can help you fill out this form."
+  },
+  {
+    "id": "louisiana_answers",
+    "name": "Louisiana Answers (aging and disability resource center)",
+    "phone": "1-877-340-9100",
+    "why": "Can help you apply for the Medicare Savings Program."
+  },
+  {
+    "id": "medicaid",
+    "name": "Louisiana Medicaid",
+    "phone": "1-888-342-6207",
+    "tty": "1-800-220-5404",
+    "hours": "Monday to Friday, 8 a.m. to 4:30 p.m.",
+    "why": "Questions about the form itself or your application."
+  }
+]

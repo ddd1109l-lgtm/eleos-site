@@ -1,0 +1,118 @@
+{
+  "progress": {
+    "answers": {},
+    "done": []
+  },
+  "nextFieldId": "cover_language",
+  "complete": false,
+  "requiredDone": 0,
+  "requiredTotal": 30,
+  "statuses": {
+    "cover_language": "todo",
+    "s1_name": "todo",
+    "s1_ssn": "todo",
+    "s1_dob": "todo",
+    "s1_sex": "todo",
+    "s1_marital_status": "todo",
+    "s1_hispanic": "todo",
+    "s1_race": "todo",
+    "s2_mailing_address": "todo",
+    "s2_home_different": "todo",
+    "s2_home_address": "hidden",
+    "s2_email": "todo",
+    "s2_parish": "todo",
+    "s2_phones": "todo",
+    "s3_married_living_together": "todo",
+    "s3_spouse_name": "hidden",
+    "s3_spouse_ssn": "hidden",
+    "s3_spouse_dob": "hidden",
+    "s3_spouse_sex": "hidden",
+    "s3_spouse_hispanic": "hidden",
+    "s3_spouse_race": "hidden",
+    "s3_spouse_applying": "hidden",
+    "s4_medicare_number": "todo",
+    "s4_other_insurance": "todo",
+    "s4_spouse_medicare_number": "hidden",
+    "s4_spouse_other_insurance": "hidden",
+    "s5_anyone_works": "todo",
+    "s5_worker_name": "hidden",
+    "s5_employer_name": "hidden",
+    "s5_employer_phone": "hidden",
+    "s5_self_employed": "hidden",
+    "s5_gross_pay": "hidden",
+    "s5_pay_frequency": "hidden",
+    "s6_other_money": "todo",
+    "s6_who_receives": "hidden",
+    "s6_source": "hidden",
+    "s6_gross_amount": "hidden",
+    "s6_frequency": "hidden",
+    "s7_medical_bills": "todo",
+    "s7_who_received_care": "hidden",
+    "s7_provider": "hidden",
+    "s7_provider_phone": "hidden",
+    "s7_dates": "hidden",
+    "s7_total_cost": "hidden",
+    "s8_checking": "todo",
+    "s8_savings": "todo",
+    "s8_direct_express": "todo",
+    "s8_vehicle": "todo",
+    "s8_other_vehicles": "todo",
+    "s8_other_property": "todo",
+    "s8_cd": "todo",
+    "s8_investments": "todo",
+    "s8_life_burial_insurance": "todo",
+    "s8_burial_funds": "todo",
+    "s8_safe_deposit": "todo",
+    "s8_other": "todo",
+    "rights_read": "todo",
+    "sign_applicant": "todo",
+    "sign_spouse": "hidden",
+    "sign_comments": "todo"
+  },
+  "sections": [
+    {
+      "id": "cover",
+      "status": "todo"
+    },
+    {
+      "id": "s1",
+      "status": "todo"
+    },
+    {
+      "id": "s2",
+      "status": "todo"
+    },
+    {
+      "id": "s3",
+      "status": "todo"
+    },
+    {
+      "id": "s4",
+      "status": "todo"
+    },
+    {
+      "id": "s5",
+      "status": "todo"
+    },
+    {
+      "id": "s6",
+      "status": "todo"
+    },
+    {
+      "id": "s7",
+      "status": "todo"
+    },
+    {
+      "id": "s8",
+      "status": "todo"
+    },
+    {
+      "id": "rights",
+      "status": "todo"
+    },
+    {
+      "id": "sign",
+      "status": "todo"
+    }
+  ]
+}

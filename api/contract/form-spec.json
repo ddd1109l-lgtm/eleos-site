@@ -1,0 +1,2232 @@
+{
+  "id": "la-bhsf-1mb",
+  "title": "Application for Louisiana's Medicare Savings Program",
+  "form": "BHSF Form 1-MB",
+  "revision": "Rev. 3/22",
+  "jurisdiction": "Louisiana",
+  "checkedOn": "2026-10-25",
+  "sourceUrl": "https://ldh.la.gov/assets/medicaid/MedicaidEligibilityForms/MedicareSavingsProgram.pdf",
+  "pages": [
+    {
+      "number": 1,
+      "image": "form/page-1.png",
+      "contents": "Cover, language, Section 1 Personal Information, Section 2 Contact Information"
+    },
+    {
+      "number": 2,
+      "image": "form/page-2.png",
+      "contents": "Section 3 Spouse, Section 4 Medicare, Section 5 Jobs, Section 6 Other Money"
+    },
+    {
+      "number": 3,
+      "image": "form/page-3.png",
+      "contents": "Section 7 Medical Expenses, Section 8 Things You Own"
+    },
+    {
+      "number": 4,
+      "image": "form/page-4.png",
+      "contents": "Your Rights and Responsibilities"
+    },
+    {
+      "number": 5,
+      "image": "form/page-5.png",
+      "contents": "Signatures and extra space"
+    }
+  ],
+  "documents": [
+    {
+      "id": "medicare_card",
+      "name": "Medicare card",
+      "whatItLooksLike": "Red, white and blue card with your name, Medicare Number, and Part A and Part B start dates.",
+      "answers": [
+        "s1_name",
+        "s4_medicare_number"
+      ],
+      "sampleImage": "docs/sample_medicare_card.png",
+      "whoNeedsIt": "Everyone (and your spouse's card if married)"
+    },
+    {
+      "id": "ss_award_letter",
+      "name": "Social Security benefit (award) letter",
+      "whatItLooksLike": "Letter from Social Security showing your monthly benefit before deductions, the Medicare deduction, and what you're paid after.",
+      "answers": [
+        "s6_source",
+        "s6_gross_amount"
+      ],
+      "sampleImage": "docs/sample_award_letter.png",
+      "whoNeedsIt": "Anyone who gets Social Security"
+    },
+    {
+      "id": "bank_statement",
+      "name": "Most recent bank statement",
+      "whatItLooksLike": "Statement with the bank's name, your name, the statement dates and the ending balance.",
+      "answers": [
+        "s8_checking",
+        "s8_savings",
+        "s8_cd"
+      ],
+      "sampleImage": "docs/sample_bank_statement.png",
+      "whoNeedsIt": "Anyone with a bank account"
+    },
+    {
+      "id": "pension_statement",
+      "name": "Pension statement",
+      "whatItLooksLike": "Statement from your former employer or pension fund showing the gross monthly payment.",
+      "answers": [
+        "s6_source",
+        "s6_gross_amount"
+      ],
+      "sampleImage": "docs/sample_pension_statement.png",
+      "whoNeedsIt": "Only if you get a pension"
+    },
+    {
+      "id": "pay_stubs",
+      "name": "Recent pay stubs",
+      "whatItLooksLike": "Pay stub showing the employer, the pay period and gross pay.",
+      "answers": [
+        "s5_employer_name",
+        "s5_gross_pay",
+        "s5_pay_frequency"
+      ],
+      "sampleImage": "docs/sample_pay_stub.png",
+      "whoNeedsIt": "Only if someone in the home works"
+    },
+    {
+      "id": "other_insurance_card",
+      "name": "Other insurance card",
+      "whatItLooksLike": "Card for a Medigap or retiree health plan.",
+      "answers": [
+        "s4_other_insurance"
+      ],
+      "sampleImage": null,
+      "whoNeedsIt": "Only if you have other health insurance"
+    },
+    {
+      "id": "medical_bills",
+      "name": "Medical bills from the past 3 months",
+      "whatItLooksLike": "Bills from a doctor, clinic or hospital.",
+      "answers": [
+        "s7_provider",
+        "s7_dates",
+        "s7_total_cost"
+      ],
+      "sampleImage": null,
+      "whoNeedsIt": "Only if you had medical care in the past 3 months"
+    },
+    {
+      "id": "vehicle_title",
+      "name": "Vehicle title or registration",
+      "whatItLooksLike": "Title or registration for a car, truck or boat.",
+      "answers": [
+        "s8_vehicle",
+        "s8_other_vehicles"
+      ],
+      "sampleImage": null,
+      "whoNeedsIt": "Only if you own a vehicle"
+    },
+    {
+      "id": "insurance_policies",
+      "name": "Life or burial insurance policies",
+      "whatItLooksLike": "Policy papers or a pre-need funeral contract.",
+      "answers": [
+        "s8_life_burial_insurance",
+        "s8_burial_funds"
+      ],
+      "sampleImage": null,
+      "whoNeedsIt": "Only if you have them"
+    }
+  ],
+  "sections": [
+    {
+      "id": "cover",
+      "number": "",
+      "title": "Before you start",
+      "page": 1
+    },
+    {
+      "id": "s1",
+      "number": "1",
+      "title": "Personal Information",
+      "page": 1
+    },
+    {
+      "id": "s2",
+      "number": "2",
+      "title": "Contact Information",
+      "page": 1
+    },
+    {
+      "id": "s3",
+      "number": "3",
+      "title": "Spouse's Information",
+      "page": 2
+    },
+    {
+      "id": "s4",
+      "number": "4",
+      "title": "Medicare Information",
+      "page": 2
+    },
+    {
+      "id": "s5",
+      "number": "5",
+      "title": "Money from Jobs",
+      "page": 2
+    },
+    {
+      "id": "s6",
+      "number": "6",
+      "title": "Other Money",
+      "page": 2
+    },
+    {
+      "id": "s7",
+      "number": "7",
+      "title": "Medical Expenses",
+      "page": 3,
+      "sensitive": "health"
+    },
+    {
+      "id": "s8",
+      "number": "8",
+      "title": "Things You Own",
+      "page": 3
+    },
+    {
+      "id": "rights",
+      "number": "",
+      "title": "Your Rights and Responsibilities",
+      "page": 4
+    },
+    {
+      "id": "sign",
+      "number": "",
+      "title": "Sign and date",
+      "page": 5
+    }
+  ],
+  "fields": [
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "cover_language",
+      "section": "cover",
+      "page": 1,
+      "kind": "write",
+      "label": "What is your preferred language?",
+      "plain": "Check the box for the language you want Medicaid to use with you.",
+      "aids": [
+        "form.cover_language"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [
+        "medicare_card"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s1_name",
+      "section": "s1",
+      "page": 1,
+      "kind": "write",
+      "label": "First name / Middle initial / Last name / Suffix (Sr., Jr., etc.)",
+      "plain": "Write your name the way it appears on your Medicare card.",
+      "aids": [
+        "form.s1_name",
+        "doc.medicare_card.name"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "id_number",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1; page 4 (Rights and Responsibilities)",
+      "id": "s1_ssn",
+      "section": "s1",
+      "page": 1,
+      "kind": "write",
+      "label": "Social Security number",
+      "plain": "Write your 9-digit Social Security number on the form. Do not type it or say it here.",
+      "tips": [
+        "The form says giving it is voluntary, but leaving it blank can slow down or stop your application."
+      ],
+      "aids": [
+        "form.s1_ssn"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s1_dob",
+      "section": "s1",
+      "page": 1,
+      "kind": "write",
+      "label": "Date of birth",
+      "plain": "Write the month, day and year you were born.",
+      "aids": [
+        "form.s1_dob"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s1_sex",
+      "section": "s1",
+      "page": 1,
+      "kind": "write",
+      "label": "Sex (Male / Female)",
+      "plain": "Check one box.",
+      "aids": [
+        "form.s1_sex"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s1_marital_status",
+      "section": "s1",
+      "page": 1,
+      "kind": "write",
+      "label": "Marital status (Single / Married / Widowed / Divorced/separated)",
+      "plain": "Check the one box that describes you today.",
+      "aids": [
+        "form.s1_marital_status"
+      ]
+    },
+    {
+      "required": false,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s1_hispanic",
+      "section": "s1",
+      "page": 1,
+      "kind": "write",
+      "label": "Are you Hispanic or Latino? (optional)",
+      "plain": "You can answer or leave this blank. It does not change your application.",
+      "aids": [
+        "form.s1_hispanic"
+      ]
+    },
+    {
+      "required": false,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s1_race",
+      "section": "s1",
+      "page": 1,
+      "kind": "write",
+      "label": "Race (optional – you may mark one or more)",
+      "plain": "You can check one or more boxes, or leave this blank. It does not change your application.",
+      "aids": [
+        "form.s1_race"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s2_mailing_address",
+      "section": "s2",
+      "page": 1,
+      "kind": "write",
+      "label": "Mailing Address (P.O. box or street address, Apt/Lot #, City, State, Zip)",
+      "plain": "Where you get your mail. Letters about your application go here, so make sure it is right.",
+      "aids": [
+        "form.s2_mailing_address"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s2_home_different",
+      "section": "s2",
+      "page": 1,
+      "kind": "gate",
+      "appOnly": true,
+      "label": "Is your home address different from your mailing address?",
+      "plain": "For example, if you get mail at a P.O. box.",
+      "aids": []
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s2_home_different",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s2_home_address",
+      "section": "s2",
+      "page": 1,
+      "kind": "write",
+      "label": "Home Address (if different)",
+      "plain": "The street address where you live. Do not use a P.O. box here.",
+      "aids": [
+        "form.s2_home_address"
+      ]
+    },
+    {
+      "required": false,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s2_email",
+      "section": "s2",
+      "page": 1,
+      "kind": "write",
+      "label": "E-mail address (if you have one)",
+      "plain": "Leave blank if you don't use email.",
+      "aids": [
+        "form.s2_email"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s2_parish",
+      "section": "s2",
+      "page": 1,
+      "kind": "write",
+      "label": "Home parish (where you live)",
+      "plain": "Louisiana's version of a county. For example, Orleans or Jefferson.",
+      "aids": [
+        "form.s2_parish"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1",
+      "id": "s2_phones",
+      "section": "s2",
+      "page": 1,
+      "kind": "write",
+      "label": "Home phone / Cell phone / Other phone",
+      "plain": "Write any phone numbers you have so Medicaid can reach you.",
+      "aids": [
+        "form.s2_phones"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s3_married_living_together",
+      "section": "s3",
+      "page": 2,
+      "kind": "gate",
+      "label": "Are you married and living with a spouse?",
+      "plain": "Check Yes only if you are married and live together. If No, skip to Section 4.",
+      "aids": []
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s3_married_living_together",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [
+        "medicare_card"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s3_spouse_name",
+      "section": "s3",
+      "page": 2,
+      "kind": "write",
+      "label": "Spouse: First name / Middle initial / Last name / Suffix",
+      "plain": "Your spouse's name as it appears on their Medicare card or ID.",
+      "aids": [
+        "form.s3_spouse_name"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s3_married_living_together",
+        "equals": "yes"
+      },
+      "sensitive": "id_number",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s3_spouse_ssn",
+      "section": "s3",
+      "page": 2,
+      "kind": "write",
+      "label": "Spouse: Social Security number",
+      "plain": "Write your spouse's Social Security number on the form. Do not type it or say it here.",
+      "aids": [
+        "form.s3_spouse_ssn"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s3_married_living_together",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s3_spouse_dob",
+      "section": "s3",
+      "page": 2,
+      "kind": "write",
+      "label": "Spouse: Date of birth",
+      "plain": "Your spouse's month, day and year of birth.",
+      "aids": [
+        "form.s3_spouse_dob"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s3_married_living_together",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s3_spouse_sex",
+      "section": "s3",
+      "page": 2,
+      "kind": "write",
+      "label": "Spouse: Sex (Male / Female)",
+      "plain": "Check one box.",
+      "aids": [
+        "form.s3_spouse_sex"
+      ]
+    },
+    {
+      "required": false,
+      "condition": {
+        "field": "s3_married_living_together",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s3_spouse_hispanic",
+      "section": "s3",
+      "page": 2,
+      "kind": "write",
+      "label": "Is he/she Hispanic or Latino? (optional)",
+      "plain": "Optional. You can leave it blank.",
+      "aids": [
+        "form.s3_spouse_hispanic"
+      ]
+    },
+    {
+      "required": false,
+      "condition": {
+        "field": "s3_married_living_together",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s3_spouse_race",
+      "section": "s3",
+      "page": 2,
+      "kind": "write",
+      "label": "Spouse: Race (optional – you may mark one or more)",
+      "plain": "Optional. You can leave it blank.",
+      "aids": [
+        "form.s3_spouse_race"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s3_married_living_together",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s3_spouse_applying",
+      "section": "s3",
+      "page": 2,
+      "kind": "gate",
+      "label": "Does your spouse want to apply for the Medicare Savings Program?",
+      "plain": "If Yes, your spouse also signs on the last page.",
+      "aids": []
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "id_number",
+      "sourceDocs": [
+        "medicare_card"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2; CMS MBI format guide",
+      "id": "s4_medicare_number",
+      "section": "s4",
+      "page": 2,
+      "kind": "write",
+      "label": "Medicare Claim Number (You)",
+      "plain": "Copy the Medicare Number from your red, white and blue Medicare card. It has 11 letters and numbers. Write it on the form; don't type it here.",
+      "aids": [
+        "form.s4_medicare_number",
+        "doc.medicare_card.number"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [
+        "other_insurance_card"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s4_other_insurance",
+      "section": "s4",
+      "page": 2,
+      "kind": "write",
+      "label": "Does this person have health insurance (other than Medicare) or a Medicare supplement? (You)",
+      "plain": "Check Yes if you have any other health plan, like a retiree plan or a Medigap (supplement) policy.",
+      "aids": [
+        "form.s4_other_insurance"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s3_married_living_together",
+        "equals": "yes"
+      },
+      "sensitive": "id_number",
+      "sourceDocs": [
+        "medicare_card"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s4_spouse_medicare_number",
+      "section": "s4",
+      "page": 2,
+      "kind": "write",
+      "label": "Medicare Claim Number (Your Spouse)",
+      "plain": "Copy the number from your spouse's Medicare card onto the form. Don't type it here.",
+      "aids": [
+        "form.s4_spouse_medicare_number",
+        "doc.medicare_card.number"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s3_married_living_together",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s4_spouse_other_insurance",
+      "section": "s4",
+      "page": 2,
+      "kind": "write",
+      "label": "Does this person have health insurance (other than Medicare) or a Medicare supplement? (Your Spouse)",
+      "plain": "Same question for your spouse.",
+      "aids": [
+        "form.s4_spouse_other_insurance"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s5_anyone_works",
+      "section": "s5",
+      "page": 2,
+      "kind": "gate",
+      "label": "Does anyone in the home work?",
+      "plain": "Count any paid work, including part-time jobs, cash jobs, tips and self-employment. If No, skip to Section 6.",
+      "aids": []
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s5_anyone_works",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [
+        "pay_stubs"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s5_worker_name",
+      "section": "s5",
+      "page": 2,
+      "kind": "write",
+      "label": "Worker's name",
+      "plain": "Who has the job.",
+      "repeatNote": "Use one column per job, up to 3 jobs.",
+      "aids": [
+        "form.s5_worker_name"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s5_anyone_works",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [
+        "pay_stubs"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s5_employer_name",
+      "section": "s5",
+      "page": 2,
+      "kind": "write",
+      "label": "Employer name",
+      "plain": "The business they work for. It's printed at the top of a pay stub.",
+      "repeatNote": "Use one column per job, up to 3 jobs.",
+      "aids": [
+        "form.s5_employer_name"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s5_anyone_works",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [
+        "pay_stubs"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s5_employer_phone",
+      "section": "s5",
+      "page": 2,
+      "kind": "write",
+      "label": "Employer phone number",
+      "plain": "The employer's phone number, if you have it.",
+      "repeatNote": "Use one column per job, up to 3 jobs.",
+      "aids": [
+        "form.s5_employer_phone"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s5_anyone_works",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [
+        "pay_stubs"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s5_self_employed",
+      "section": "s5",
+      "page": 2,
+      "kind": "write",
+      "label": "Is this person self-employed?",
+      "plain": "Check Yes if they work for themselves instead of a company.",
+      "repeatNote": "Use one column per job, up to 3 jobs.",
+      "aids": [
+        "form.s5_self_employed"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s5_anyone_works",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [
+        "pay_stubs"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s5_gross_pay",
+      "section": "s5",
+      "page": 2,
+      "kind": "write",
+      "label": "How much are they paid? (gross income before taxes)",
+      "plain": "The pay before taxes or anything else is taken out. On a pay stub this is usually called gross pay.",
+      "repeatNote": "Use one column per job, up to 3 jobs.",
+      "aids": [
+        "form.s5_gross_pay",
+        "doc.pay_stub.gross"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s5_anyone_works",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [
+        "pay_stubs"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s5_pay_frequency",
+      "section": "s5",
+      "page": 2,
+      "kind": "write",
+      "label": "How often paid? (weekly, biweekly, monthly, etc.)",
+      "plain": "How often the paycheck comes. Biweekly means every two weeks.",
+      "repeatNote": "Use one column per job, up to 3 jobs.",
+      "aids": [
+        "form.s5_pay_frequency"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s6_other_money",
+      "section": "s6",
+      "page": 2,
+      "kind": "gate",
+      "label": "Does anyone in the home get money from other sources?",
+      "plain": "For example Social Security, a pension, or worker's comp. Most people answer Yes because of Social Security. If No, skip to Section 7.",
+      "aids": []
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s6_other_money",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s6_who_receives",
+      "section": "s6",
+      "page": 2,
+      "kind": "write",
+      "label": "Who receives the money?",
+      "plain": "The person whose name is on the payment.",
+      "repeatNote": "Use one column per source, up to 3 sources.",
+      "aids": [
+        "form.s6_who_receives"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s6_other_money",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [
+        "ss_award_letter",
+        "pension_statement"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s6_source",
+      "section": "s6",
+      "page": 2,
+      "kind": "write",
+      "label": "Where does it come from?",
+      "plain": "For example: Social Security, City of New Orleans pension.",
+      "repeatNote": "Use one column per source, up to 3 sources.",
+      "aids": [
+        "form.s6_source"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s6_other_money",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [
+        "ss_award_letter",
+        "pension_statement"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2; research packet section 5",
+      "id": "s6_gross_amount",
+      "section": "s6",
+      "page": 2,
+      "kind": "write",
+      "label": "How much are they paid? (gross income before taxes)",
+      "plain": "The full amount before anything is taken out. For Social Security, use the amount before Medicare is taken out. That is the bigger number on your award letter, not what lands in your bank.",
+      "tips": [
+        "Use the amount before the Medicare (Part B) deduction."
+      ],
+      "repeatNote": "Use one column per source, up to 3 sources.",
+      "aids": [
+        "form.s6_gross_amount",
+        "doc.award_letter.before_deductions",
+        "doc.pension.gross"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s6_other_money",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2",
+      "id": "s6_frequency",
+      "section": "s6",
+      "page": 2,
+      "kind": "write",
+      "label": "How often paid? (weekly, biweekly, monthly, etc.)",
+      "plain": "Social Security is paid monthly.",
+      "repeatNote": "Use one column per source, up to 3 sources.",
+      "aids": [
+        "form.s6_frequency"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "health",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3",
+      "id": "s7_medical_bills",
+      "section": "s7",
+      "page": 3,
+      "kind": "gate",
+      "label": "Do you or your spouse have medical bills (paid or unpaid) for medical care received in the past 3 months?",
+      "plain": "Answer on the paper form. Here, just tell the app whether to walk you through the rest of Section 7. If No, skip to Section 8.",
+      "aids": []
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s7_medical_bills",
+        "equals": "yes"
+      },
+      "sensitive": "health",
+      "sourceDocs": [
+        "medical_bills"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3",
+      "id": "s7_who_received_care",
+      "section": "s7",
+      "page": 3,
+      "kind": "write",
+      "label": "Who received care?",
+      "plain": "You or your spouse.",
+      "repeatNote": "Use one column per bill, up to 3.",
+      "aids": [
+        "form.s7_who_received_care"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s7_medical_bills",
+        "equals": "yes"
+      },
+      "sensitive": "health",
+      "sourceDocs": [
+        "medical_bills"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3",
+      "id": "s7_provider",
+      "section": "s7",
+      "page": 3,
+      "kind": "write",
+      "label": "Name of doctor, clinic, or other medical provider",
+      "plain": "Copy it from the top of the bill.",
+      "repeatNote": "Use one column per bill, up to 3.",
+      "aids": [
+        "form.s7_provider"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s7_medical_bills",
+        "equals": "yes"
+      },
+      "sensitive": "health",
+      "sourceDocs": [
+        "medical_bills"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3",
+      "id": "s7_provider_phone",
+      "section": "s7",
+      "page": 3,
+      "kind": "write",
+      "label": "Phone number",
+      "plain": "The provider's phone number, usually printed on the bill.",
+      "repeatNote": "Use one column per bill, up to 3.",
+      "aids": [
+        "form.s7_provider_phone"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s7_medical_bills",
+        "equals": "yes"
+      },
+      "sensitive": "health",
+      "sourceDocs": [
+        "medical_bills"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3",
+      "id": "s7_dates",
+      "section": "s7",
+      "page": 3,
+      "kind": "write",
+      "label": "Dates of service",
+      "plain": "The date of the visit or care, not the date the bill was mailed.",
+      "repeatNote": "Use one column per bill, up to 3.",
+      "aids": [
+        "form.s7_dates"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s7_medical_bills",
+        "equals": "yes"
+      },
+      "sensitive": "health",
+      "sourceDocs": [
+        "medical_bills"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3",
+      "id": "s7_total_cost",
+      "section": "s7",
+      "page": 3,
+      "kind": "write",
+      "label": "Total cost",
+      "plain": "The total charge shown on the bill.",
+      "repeatNote": "Use one column per bill, up to 3.",
+      "aids": [
+        "form.s7_total_cost"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "account",
+      "sourceDocs": [
+        "bank_statement"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_checking",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Checking accounts",
+      "plain": "Check Yes or No for \"Checking accounts\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_checking",
+        "doc.bank_statement.balance"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "account",
+      "sourceDocs": [
+        "bank_statement"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_savings",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Savings accounts",
+      "plain": "Check Yes or No for \"Savings accounts\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_savings"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "account",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_direct_express",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Direct express accounts",
+      "plain": "Check Yes or No for \"Direct express accounts\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_direct_express"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [
+        "vehicle_title"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_vehicle",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Vehicle (cars, trucks, boats, motorcycles, RVs, ATVs, etc.)",
+      "plain": "Check Yes or No for \"Vehicle (cars, trucks, boats, motorcycles, RVs, ATVs, etc.)\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_vehicle"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [
+        "vehicle_title"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_other_vehicles",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Other vehicles",
+      "plain": "Check Yes or No for \"Other vehicles\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_other_vehicles"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_other_property",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Property other than where you live",
+      "plain": "Check Yes or No for \"Property other than where you live\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_other_property"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "account",
+      "sourceDocs": [
+        "bank_statement"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_cd",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Certificates of Deposit (CD)",
+      "plain": "Check Yes or No for \"Certificates of Deposit (CD)\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_cd"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "account",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_investments",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Annuities, trusts, stocks, bonds, retirement accounts",
+      "plain": "Check Yes or No for \"Annuities, trusts, stocks, bonds, retirement accounts\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_investments"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [
+        "insurance_policies"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_life_burial_insurance",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Life or burial insurance",
+      "plain": "Check Yes or No for \"Life or burial insurance\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_life_burial_insurance"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [
+        "insurance_policies"
+      ],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_burial_funds",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Money set aside for burial or pre-need contract",
+      "plain": "Check Yes or No for \"Money set aside for burial or pre-need contract\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_burial_funds"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_safe_deposit",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Safe deposit box",
+      "plain": "Check Yes or No for \"Safe deposit box\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_safe_deposit"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 3; LDH Medicare Savings Program page",
+      "id": "s8_other",
+      "section": "s8",
+      "page": 3,
+      "kind": "row",
+      "label": "Other",
+      "plain": "Check Yes or No for \"Other\". If Yes, write who owns it, describe it (for example the bank's name), and about how much it is worth. Don't write account numbers.",
+      "tips": [
+        "Louisiana does not count savings for these programs, but the form still asks. Answer every row yes or no."
+      ],
+      "aids": [
+        "form.s8_other"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 4",
+      "id": "rights_read",
+      "section": "rights",
+      "page": 4,
+      "kind": "info",
+      "label": "Your Rights and Responsibilities",
+      "plain": "Read this page or have someone read it to you. It explains that Medicaid will check your information and that you must report changes within 10 days.",
+      "aids": [
+        "form.rights_read"
+      ]
+    },
+    {
+      "required": true,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 5",
+      "id": "sign_applicant",
+      "section": "sign",
+      "page": 5,
+      "kind": "sign",
+      "label": "Sign here: / Date:",
+      "plain": "Sign your name and write today's date. Your application can't be processed without it.",
+      "aids": [
+        "form.sign_applicant"
+      ]
+    },
+    {
+      "required": true,
+      "condition": {
+        "field": "s3_spouse_applying",
+        "equals": "yes"
+      },
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 5",
+      "id": "sign_spouse",
+      "section": "sign",
+      "page": 5,
+      "kind": "sign",
+      "label": "Spouse sign here (if applying): / Date:",
+      "plain": "Your spouse signs and dates here because they are applying too.",
+      "aids": [
+        "form.sign_spouse"
+      ]
+    },
+    {
+      "required": false,
+      "condition": null,
+      "sensitive": "none",
+      "sourceDocs": [],
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 5",
+      "id": "sign_comments",
+      "section": "sign",
+      "page": 5,
+      "kind": "write",
+      "label": "Use this space for any comments or information that you could not fit on your application.",
+      "plain": "Extra room if you had more than 3 jobs, income sources or bills.",
+      "aids": [
+        "form.sign_comments"
+      ]
+    }
+  ],
+  "aids": [
+    {
+      "id": "form.cover_language",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"What is your preferred language?\".",
+      "caption": "Page 1: What is your preferred language?",
+      "placeholder": true
+    },
+    {
+      "id": "form.s1_name",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"First name / Middle initial / Last name / Suffix (Sr., Jr., etc.)\".",
+      "caption": "Page 1: First name / Middle initial / Last name / Suffix (Sr., Jr., etc.)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s1_ssn",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"Social Security number\".",
+      "caption": "Page 1: Social Security number",
+      "placeholder": true
+    },
+    {
+      "id": "form.s1_dob",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"Date of birth\".",
+      "caption": "Page 1: Date of birth",
+      "placeholder": true
+    },
+    {
+      "id": "form.s1_sex",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"Sex (Male / Female)\".",
+      "caption": "Page 1: Sex (Male / Female)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s1_marital_status",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"Marital status (Single / Married / Widowed / Divorced/separated)\".",
+      "caption": "Page 1: Marital status (Single / Married / Widowed / Divorced/separated)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s1_hispanic",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"Are you Hispanic or Latino? (optional)\".",
+      "caption": "Page 1: Are you Hispanic or Latino? (optional)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s1_race",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"Race (optional – you may mark one or more)\".",
+      "caption": "Page 1: Race (optional – you may mark one or more)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s2_mailing_address",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"Mailing Address (P.O. box or street address, Apt/Lot #, City, State, Zip)\".",
+      "caption": "Page 1: Mailing Address (P.O. box or street address, Apt/Lot #, City, State, Zip)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s2_home_address",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"Home Address (if different)\".",
+      "caption": "Page 1: Home Address (if different)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s2_email",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"E-mail address (if you have one)\".",
+      "caption": "Page 1: E-mail address (if you have one)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s2_parish",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"Home parish (where you live)\".",
+      "caption": "Page 1: Home parish (where you live)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s2_phones",
+      "image": "form/page-1.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 1 of the application, the box labeled \"Home phone / Cell phone / Other phone\".",
+      "caption": "Page 1: Home phone / Cell phone / Other phone",
+      "placeholder": true
+    },
+    {
+      "id": "form.s3_spouse_name",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Spouse: First name / Middle initial / Last name / Suffix\".",
+      "caption": "Page 2: Spouse: First name / Middle initial / Last name / Suffix",
+      "placeholder": true
+    },
+    {
+      "id": "form.s3_spouse_ssn",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Spouse: Social Security number\".",
+      "caption": "Page 2: Spouse: Social Security number",
+      "placeholder": true
+    },
+    {
+      "id": "form.s3_spouse_dob",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Spouse: Date of birth\".",
+      "caption": "Page 2: Spouse: Date of birth",
+      "placeholder": true
+    },
+    {
+      "id": "form.s3_spouse_sex",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Spouse: Sex (Male / Female)\".",
+      "caption": "Page 2: Spouse: Sex (Male / Female)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s3_spouse_hispanic",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Is he/she Hispanic or Latino? (optional)\".",
+      "caption": "Page 2: Is he/she Hispanic or Latino? (optional)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s3_spouse_race",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Spouse: Race (optional – you may mark one or more)\".",
+      "caption": "Page 2: Spouse: Race (optional – you may mark one or more)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s4_medicare_number",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Medicare Claim Number (You)\".",
+      "caption": "Page 2: Medicare Claim Number (You)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s4_other_insurance",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Does this person have health insurance (other than Medicare) or a Medicare supplement? (You)\".",
+      "caption": "Page 2: Does this person have health insurance (other than Medicare) or a Medicare supplement? (You)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s4_spouse_medicare_number",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Medicare Claim Number (Your Spouse)\".",
+      "caption": "Page 2: Medicare Claim Number (Your Spouse)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s4_spouse_other_insurance",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Does this person have health insurance (other than Medicare) or a Medicare supplement? (Your Spouse)\".",
+      "caption": "Page 2: Does this person have health insurance (other than Medicare) or a Medicare supplement? (Your Spouse)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s5_worker_name",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Worker's name\".",
+      "caption": "Page 2: Worker's name",
+      "placeholder": true
+    },
+    {
+      "id": "form.s5_employer_name",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Employer name\".",
+      "caption": "Page 2: Employer name",
+      "placeholder": true
+    },
+    {
+      "id": "form.s5_employer_phone",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Employer phone number\".",
+      "caption": "Page 2: Employer phone number",
+      "placeholder": true
+    },
+    {
+      "id": "form.s5_self_employed",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Is this person self-employed?\".",
+      "caption": "Page 2: Is this person self-employed?",
+      "placeholder": true
+    },
+    {
+      "id": "form.s5_gross_pay",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"How much are they paid? (gross income before taxes)\".",
+      "caption": "Page 2: How much are they paid? (gross income before taxes)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s5_pay_frequency",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"How often paid? (weekly, biweekly, monthly, etc.)\".",
+      "caption": "Page 2: How often paid? (weekly, biweekly, monthly, etc.)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s6_who_receives",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Who receives the money?\".",
+      "caption": "Page 2: Who receives the money?",
+      "placeholder": true
+    },
+    {
+      "id": "form.s6_source",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"Where does it come from?\".",
+      "caption": "Page 2: Where does it come from?",
+      "placeholder": true
+    },
+    {
+      "id": "form.s6_gross_amount",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"How much are they paid? (gross income before taxes)\".",
+      "caption": "Page 2: How much are they paid? (gross income before taxes)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s6_frequency",
+      "image": "form/page-2.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 2 of the application, the box labeled \"How often paid? (weekly, biweekly, monthly, etc.)\".",
+      "caption": "Page 2: How often paid? (weekly, biweekly, monthly, etc.)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s7_who_received_care",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Who received care?\".",
+      "caption": "Page 3: Who received care?",
+      "placeholder": true
+    },
+    {
+      "id": "form.s7_provider",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Name of doctor, clinic, or other medical provider\".",
+      "caption": "Page 3: Name of doctor, clinic, or other medical provider",
+      "placeholder": true
+    },
+    {
+      "id": "form.s7_provider_phone",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Phone number\".",
+      "caption": "Page 3: Phone number",
+      "placeholder": true
+    },
+    {
+      "id": "form.s7_dates",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Dates of service\".",
+      "caption": "Page 3: Dates of service",
+      "placeholder": true
+    },
+    {
+      "id": "form.s7_total_cost",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Total cost\".",
+      "caption": "Page 3: Total cost",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_checking",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Checking accounts\".",
+      "caption": "Page 3: Checking accounts",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_savings",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Savings accounts\".",
+      "caption": "Page 3: Savings accounts",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_direct_express",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Direct express accounts\".",
+      "caption": "Page 3: Direct express accounts",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_vehicle",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Vehicle (cars, trucks, boats, motorcycles, RVs, ATVs, etc.)\".",
+      "caption": "Page 3: Vehicle (cars, trucks, boats, motorcycles, RVs, ATVs, etc.)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_other_vehicles",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Other vehicles\".",
+      "caption": "Page 3: Other vehicles",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_other_property",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Property other than where you live\".",
+      "caption": "Page 3: Property other than where you live",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_cd",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Certificates of Deposit (CD)\".",
+      "caption": "Page 3: Certificates of Deposit (CD)",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_investments",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Annuities, trusts, stocks, bonds, retirement accounts\".",
+      "caption": "Page 3: Annuities, trusts, stocks, bonds, retirement accounts",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_life_burial_insurance",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Life or burial insurance\".",
+      "caption": "Page 3: Life or burial insurance",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_burial_funds",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Money set aside for burial or pre-need contract\".",
+      "caption": "Page 3: Money set aside for burial or pre-need contract",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_safe_deposit",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Safe deposit box\".",
+      "caption": "Page 3: Safe deposit box",
+      "placeholder": true
+    },
+    {
+      "id": "form.s8_other",
+      "image": "form/page-3.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 3 of the application, the box labeled \"Other\".",
+      "caption": "Page 3: Other",
+      "placeholder": true
+    },
+    {
+      "id": "form.rights_read",
+      "image": "form/page-4.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 4 of the application, the box labeled \"Your Rights and Responsibilities\".",
+      "caption": "Page 4: Your Rights and Responsibilities",
+      "placeholder": true
+    },
+    {
+      "id": "form.sign_applicant",
+      "image": "form/page-5.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 5 of the application, the box labeled \"Sign here: / Date:\".",
+      "caption": "Page 5: Sign here: / Date:",
+      "placeholder": true
+    },
+    {
+      "id": "form.sign_spouse",
+      "image": "form/page-5.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 5 of the application, the box labeled \"Spouse sign here (if applying): / Date:\".",
+      "caption": "Page 5: Spouse sign here (if applying): / Date:",
+      "placeholder": true
+    },
+    {
+      "id": "form.sign_comments",
+      "image": "form/page-5.png",
+      "box": {
+        "x": 5,
+        "y": 10,
+        "w": 90,
+        "h": 4
+      },
+      "spoken": "On page 5 of the application, the box labeled \"Use this space for any comments or information that you could not fit on your application.\".",
+      "caption": "Page 5: Use this space for any comments or information that you could not fit on your application.",
+      "placeholder": true
+    },
+    {
+      "id": "doc.medicare_card.name",
+      "image": "docs/sample_medicare_card.png",
+      "box": {
+        "x": 8,
+        "y": 40,
+        "w": 60,
+        "h": 10
+      },
+      "caption": "Your name on the Medicare card",
+      "spoken": "Your name is printed in the middle of your Medicare card.",
+      "placeholder": true
+    },
+    {
+      "id": "doc.medicare_card.number",
+      "image": "docs/sample_medicare_card.png",
+      "box": {
+        "x": 8,
+        "y": 55,
+        "w": 55,
+        "h": 10
+      },
+      "caption": "Medicare Number",
+      "spoken": "Your Medicare Number is the line of 11 letters and numbers under your name.",
+      "placeholder": true
+    },
+    {
+      "id": "doc.award_letter.before_deductions",
+      "image": "docs/sample_award_letter.png",
+      "box": {
+        "x": 10,
+        "y": 38,
+        "w": 80,
+        "h": 6
+      },
+      "caption": "Benefit before deductions",
+      "spoken": "On your award letter, the line for your full monthly benefit before deductions, about a third of the way down.",
+      "placeholder": true
+    },
+    {
+      "id": "doc.pension.gross",
+      "image": "docs/sample_pension_statement.png",
+      "box": {
+        "x": 10,
+        "y": 35,
+        "w": 80,
+        "h": 6
+      },
+      "caption": "Gross monthly pension",
+      "spoken": "On your pension statement, the gross monthly amount.",
+      "placeholder": true
+    },
+    {
+      "id": "doc.pay_stub.gross",
+      "image": "docs/sample_pay_stub.png",
+      "box": {
+        "x": 55,
+        "y": 30,
+        "w": 35,
+        "h": 6
+      },
+      "caption": "Gross pay",
+      "spoken": "On your pay stub, the gross pay for this period, before taxes.",
+      "placeholder": true
+    },
+    {
+      "id": "doc.bank_statement.balance",
+      "image": "docs/sample_bank_statement.png",
+      "box": {
+        "x": 55,
+        "y": 25,
+        "w": 35,
+        "h": 6
+      },
+      "caption": "Ending balance",
+      "spoken": "On your bank statement, the ending balance near the top right.",
+      "placeholder": true
+    }
+  ],
+  "knowledge": [
+    {
+      "id": "gross",
+      "text": "Gross means the full amount before anything is taken out. For Social Security, use the benefit before the Medicare (Part B) deduction, which is the larger number on the award letter.",
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 2; research packet section 5"
+    },
+    {
+      "id": "savings_not_counted",
+      "text": "Louisiana does not count savings or things you own for QMB, SLMB or QI, but the form still asks. Answer every row in Section 8 yes or no.",
+      "citation": "LDH Medicare Savings Program page"
+    },
+    {
+      "id": "medicare_number",
+      "text": "\"Medicare Claim Number\" on the form means the Medicare Number on the red, white and blue card: 11 letters and numbers. The dashes on the card are not part of the number.",
+      "citation": "CMS MBI format guide"
+    },
+    {
+      "id": "optional_race",
+      "text": "Race and Hispanic/Latino questions are optional and do not affect the application.",
+      "citation": "BHSF Form 1-MB Rev. 3/22, pages 1-2"
+    },
+    {
+      "id": "ssn_voluntary",
+      "text": "The form says giving a Social Security number is voluntary, but leaving it out may delay or prevent coverage.",
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 4"
+    },
+    {
+      "id": "extra_space",
+      "text": "If you need more room (more than 3 jobs, sources or bills), use the comment box on page 5 or a separate sheet of paper.",
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 1"
+    },
+    {
+      "id": "who_decides",
+      "text": "Medicaid decides who qualifies. The app never decides. If you're not sure you qualify, apply anyway.",
+      "citation": "Team rule; LDH MSP page says 'Not sure if you qualify? Apply to find out.'"
+    },
+    {
+      "id": "extra_help",
+      "text": "Applying for Extra Help through Social Security also starts a Louisiana Medicare Savings Program application, unless you say you don't want that.",
+      "citation": "SSA POMS HI 00815.024"
+    },
+    {
+      "id": "full_medicaid",
+      "text": "Many people who get QMB also qualify for full Medicaid. A free counselor can check.",
+      "citation": "Research packet section 8"
+    },
+    {
+      "id": "verification",
+      "text": "Medicaid checks the information with its own systems and outside sources. The form does not list documents you must mail in.",
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 4; LDH H-1300"
+    },
+    {
+      "id": "report_changes",
+      "text": "After applying, you must tell Medicaid within 10 days if your address, income, things you own, insurance or household changes. Call 1-888-342-6207.",
+      "citation": "BHSF Form 1-MB Rev. 3/22, page 4"
+    },
+    {
+      "id": "authorized_rep",
+      "text": "A trusted person can be named to help with your application using the Medicaid Authorized Representative Form, which comes in the same PDF.",
+      "citation": "LDH MSP application packet"
+    },
+    {
+      "id": "help_line",
+      "text": "Medicaid help line: 1-888-342-6207, Monday to Friday, 8 a.m. to 4:30 p.m. TTY: 1-800-220-5404.",
+      "citation": "LDH Medicare Savings Program page"
+    }
+  ],
+  "finish": {
+    "waysToApply": [
+      {
+        "method": "Mail",
+        "detail": "Medicaid Application Office, P.O. Box 91278, Baton Rouge, LA 70821-9278"
+      },
+      {
+        "method": "Fax",
+        "detail": "1-877-523-2987"
+      },
+      {
+        "method": "Online",
+        "detail": "LDH Medicaid Self-Service Portal: sspweb.lameds.ldh.la.gov/selfservice"
+      },
+      {
+        "method": "Phone",
+        "detail": "1-888-342-6207, Monday to Friday, 8 a.m. to 4:30 p.m. (TTY 1-800-220-5404)"
+      },
+      {
+        "method": "In person",
+        "detail": "Any local Medicaid office, Monday to Friday, 8 a.m. to 4:30 p.m."
+      }
+    ],
+    "nextSteps": [
+      "Keep a copy of your signed application.",
+      "Medicaid will mail you a decision. Watch your mailbox.",
+      "If anything changes, call 1-888-342-6207 within 10 days.",
+      "Many people who get QMB also qualify for full Medicaid. A free counselor can check."
+    ]
+  }
+}
