@@ -28,7 +28,7 @@ type Ctx = Translator & {
 
 const I18nContext = createContext<Ctx | null>(null);
 
-const cacheKey = (name: string) => `eleos-i18n-v4-${name.toLowerCase()}`;
+const cacheKey = (name: string) => `eleos-i18n-v5-${name.toLowerCase()}`;
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState<Language>(FEATURED[0]);

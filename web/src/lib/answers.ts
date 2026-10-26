@@ -1,4 +1,5 @@
 import { FIELDS, HELP, SECTIONS, TERMS } from "@/data/form";
+import { genericFieldFor } from "@/data/genericFields";
 import { NATIONAL, stateByCode, type UsState } from "@/data/states";
 
 // Offline answers used when the AI model is unavailable. Kept short and drawn only from the spec.
@@ -12,13 +13,14 @@ function canned(st: UsState): { match: RegExp; answer: string }[] {
   return [
     {
       match: /passed away|died|widow/i,
-      answer:
-        "I'm sorry for your loss. In Section 1, check Widowed for marital status. Skip Section 3, because it's only for people who are married and live with their spouse.",
+      answer: la
+        ? "I'm sorry for your loss. In Section 1, check Widowed for marital status. Skip Section 3, because it's only for people who are married and live with their spouse."
+        : "I'm sorry for your loss. Where the form asks your marital status, check Widowed. You can usually skip questions about a spouse.",
     },
     {
       match: /\b(count|counts|counted)\b.*\bincome\b|\bincome\b.*\bcount|what is income/i,
       answer:
-        "Income is money that comes in each month. On this form that includes pay from a job (Section 5) and money from other places like Social Security, a pension, or worker's comp (Section 6). Write the amount before anything is taken out. For Social Security, that is the amount before your Part B premium is taken out.",
+        "Income is money that comes in each month: pay from a job, and money from other places like Social Security, a pension, or worker's comp. Write the amount before anything is taken out. For Social Security, that is the amount before your Part B premium is taken out.",
     },
     {
       match: /saving|resource|asset|bank|things (i|you) own|section 8/i,
@@ -51,8 +53,9 @@ function canned(st: UsState): { match: RegExp; answer: string }[] {
     },
     {
       match: /spouse|husband|wife|married/i,
-      answer:
-        "Fill out Section 3 only if you are married and live with your spouse. If your spouse also wants help, check Yes at the bottom of Section 3, and they sign on page 5 too.",
+      answer: la
+        ? "Fill out Section 3 only if you are married and live with your spouse. If your spouse also wants help, check Yes at the bottom of Section 3, and they sign on page 5 too."
+        : "Most forms ask about your spouse only if you are married and live together. If your spouse also wants help, ask your state's office whether they need their own application.",
     },
     {
       match: /help|counselor|person|call|phone/i,
@@ -63,9 +66,13 @@ function canned(st: UsState): { match: RegExp; answer: string }[] {
   ];
 }
 
-export function localAnswer(question: string, fieldId?: string, stateCode?: string): string {
+export function localAnswer(question: string, fieldId?: string, stateCode?: string, tappedLine?: string): string {
   const st = stateByCode(stateCode);
   const q = question.toLowerCase();
+  // "Ask about this line" quotes the line: explain what it asks before any general answer.
+  const quoted = question.match(/"([^"]{3,})"/)?.[1];
+  const quotedTopic = !st.hasForm && quoted ? genericFieldFor(quoted) : undefined;
+  if (quotedTopic) return [quotedTopic.plain, quotedTopic.where && `You can find it on: ${quotedTopic.where}.`].filter(Boolean).join(" ");
   const hit = canned(st).find((c) => c.match.test(q));
   if (hit) return hit.answer;
 
@@ -77,7 +84,11 @@ export function localAnswer(question: string, fieldId?: string, stateCode?: stri
     return [field.plain, field.where && `You can find it on: ${field.where}.`].filter(Boolean).join(" ");
   }
 
-  const section = SECTIONS.find((s) => q.includes(s.title.toLowerCase()) || (s.number && q.includes(`section ${s.number}`)));
+  // Another state's form: explain the tapped line (or quoted text) from the words printed on it.
+  const topic = genericFieldFor(question) ?? (tappedLine && /this|here|mean|what do i|what should/i.test(q) ? genericFieldFor(tappedLine) : undefined);
+  if (topic && !st.hasForm) return [topic.plain, topic.where && `You can find it on: ${topic.where}.`].filter(Boolean).join(" ");
+
+  const section = !st.hasForm ? undefined : SECTIONS.find((s) => q.includes(s.title.toLowerCase()) || (s.number && q.includes(`section ${s.number}`)));
   if (section) return [section.plain, section.skip].filter(Boolean).join(" ");
 
   return st.hasForm

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Globe, Loader2, MapPin, Search } from "lucide-react";
 import { STATES, searchStates, stateByCode } from "@/data/states";
+import { hasOwnForm } from "@/data/stateForms";
 import { useI18n } from "@/i18n/I18nProvider";
 import { searchLanguages, type Language } from "@/i18n/languages";
 import { setPrefs, usePrefs } from "@/lib/prefs";
@@ -204,7 +205,7 @@ export function StatePicker() {
   const current = stateByCode(state);
   const items = useMemo(
     () => (q: string) =>
-      searchStates(q).map((s) => ({ key: s.code, label: s.name, sub: s.agency, badge: s.hasForm ? ui("formBuiltIn") : undefined })),
+      searchStates(q).map((s) => ({ key: s.code, label: s.name, sub: s.agency, badge: s.hasForm ? ui("stepByStep") : hasOwnForm(s.code) ? ui("formBuiltIn") : undefined })),
     [ui],
   );
   return (

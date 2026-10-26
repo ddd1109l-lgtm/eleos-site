@@ -34,11 +34,15 @@ type Props = {
   localFieldId?: string;
   fieldId?: string;
   pending?: { text: string; nonce: number };
+  /** Which state form is open and the line the user tapped (already masked), for forms without a field map. */
+  form?: FormContext;
 };
+
+export type FormContext = { state: string; title: string; formId: string; model?: boolean; own?: boolean; line?: string; topic?: string };
 
 let nextId = 1;
 
-export default function Chat({ fieldId, localFieldId, progress, pending, onPerson, onAid }: Props) {
+export default function Chat({ fieldId, localFieldId, progress, pending, onPerson, onAid, form }: Props) {
   const { ui, t, lang } = useI18n();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -87,7 +91,7 @@ export default function Chat({ fieldId, localFieldId, progress, pending, onPerso
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history, fieldId, localFieldId, progress, language: lang.name, state: getPrefs().state }),
+        body: JSON.stringify({ messages: history, fieldId, localFieldId, progress, form, language: lang.name, state: getPrefs().state }),
       });
       if (!res.ok || !res.body) throw new Error(`chat ${res.status}`);
       const reader = res.body.getReader();

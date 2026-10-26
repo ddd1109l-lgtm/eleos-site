@@ -1,5 +1,6 @@
 import { DOCUMENTS, EXTRA_SPEC_LABELS, FIELDS, FORM, GENERIC_MESSAGES, GENERIC_NEXT_STEPS, MESSAGES, NEXT_STEPS, SECTIONS, SUBMIT_WAYS, SUGGESTED_QUESTIONS, TERMS, type Field, type Section, type Term } from "@/data/form";
 import { PRIVACY_NOTE } from "@/lib/privacy";
+import { GENERIC_FIELDS } from "@/data/genericFields";
 
 // Every piece of interface text. Translations use the same keys (prefixed "ui.").
 export const UI = {
@@ -15,7 +16,8 @@ export const UI = {
   translateFail: "Sorry, I couldn't translate into {lang} on this device. Showing English. Try Chrome on a computer, or pick a language marked Ready.",
   chooseState: "Choose your state",
   statePlaceholder: "Type your state, like Texas",
-  formBuiltIn: "Form built in",
+  formBuiltIn: "State form",
+  stepByStep: "Step by step",
   readAloud: "Read aloud",
   readAloudOn: "Read aloud: on",
   readAloudOff: "Read aloud: off",
@@ -48,6 +50,20 @@ export const UI = {
   medicareLineTitle: "1-800-MEDICARE",
   medicareLineBody: "Medicare's own help line can tell you how to reach your state's office.",
   statePracticeNote: "Practice form: Louisiana",
+  officialForm: "{state}'s official form",
+  officialFormNote: "This is {state}'s own application ({formId}{rev}), saved from the state's website on {date}. Your state may have a newer version, so check with them before you mail it.",
+  generalFormNote: "{state} uses its full Medicaid application for these programs. Answer the parts about Medicare and help paying Medicare costs.",
+  modelTitle: "You're practicing with the federal model form",
+  modelBody: "We couldn't find a downloadable {state} application, so this is the federal model form most states base theirs on. Learn here, then get {state}'s application from {agency}.",
+  officialSource: "Official source",
+  openOwnForm: "Open my own form (PDF)",
+  openOwnFormHint: "Got a form from your state? Open it here and Dr. Fawn will explain it the same way. It stays on your device.",
+  yourForm: "Your form",
+  backToState: "Back to {state}'s form",
+  pages: "Pages",
+  pageN: "Page {n}",
+  onThisLine: "This line says",
+  lineUnknown: "Here's this part of the form. Ask Dr. Fawn and he'll explain it in plain words.",
   startForm: "Open the form steps",
   continueForm: "Continue where I left off",
   aboutTitle: "About me",
@@ -172,6 +188,11 @@ export function englishStrings(): Record<string, string> {
   MESSAGES.forEach((m, i) => (out[`m.${i}`] = m));
   NEXT_STEPS.forEach((m, i) => (out[`n.${i}`] = m));
   GENERIC_MESSAGES.forEach((m, i) => (out[`g.${i}`] = m));
+  for (const f of GENERIC_FIELDS) {
+    out[`gf.${f.id}.label`] = f.label;
+    out[`gf.${f.id}.plain`] = f.plain;
+    if (f.where) out[`gf.${f.id}.where`] = f.where;
+  }
   GENERIC_NEXT_STEPS.forEach((m, i) => (out[`gn.${i}`] = m));
   for (const [id, label] of Object.entries(EXTRA_SPEC_LABELS)) out[`sf.${id}`] = label;
   SUBMIT_WAYS.forEach((w, i) => {

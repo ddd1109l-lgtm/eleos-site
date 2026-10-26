@@ -43,10 +43,19 @@ function clean(messages: ChatMessage[]) {
     .map((m) => ({ role: m.role, content: maskSensitive(m.content).text.slice(0, 2000) }));
 }
 
+type FormContext = { state?: string; title?: string; formId?: string; model?: boolean; own?: boolean; line?: string; topic?: string };
+
+// Only short plain strings from the browser go into the prompt, masked again here.
+function cleanForm(f?: FormContext) {
+  if (!f || typeof f !== "object" || typeof f.title !== "string") return;
+  const str = (v: unknown, max: number) => (typeof v === "string" ? maskSensitive(v).text.replace(/["\n]/g, " ").slice(0, max) : "");
+  return { title: str(f.title, 160), formId: str(f.formId, 60), model: f.model === true, own: f.own === true, line: str(f.line, 300), topic: str(f.topic, 80) };
+}
+
 export async function POST(req: Request) {
   // fieldId is the shared engine id; localFieldId is the region of the page the user tapped.
   // progress arrives already stripped of clientOnly answers and is not needed here.
-  const body = (await req.json()) as { messages?: ChatMessage[]; fieldId?: string; localFieldId?: string; language?: string; state?: string };
+  const body = (await req.json()) as { messages?: ChatMessage[]; fieldId?: string; localFieldId?: string; language?: string; state?: string; form?: FormContext };
   const messages = clean(body.messages ?? []);
   const field = FIELDS.find((f) => f.id === body.localFieldId);
   const question = messages.at(-1)?.content ?? "";
@@ -58,11 +67,22 @@ export async function POST(req: Request) {
       : `\n\nReply in ${language}. When you quote words printed on the form, give the English words in quotes first so the user can find them on the paper form, then explain in ${language}.`;
 
   const st = stateByCode(typeof body.state === "string" ? body.state : undefined);
+  const form = cleanForm(body.form);
   const stateRule = st.hasForm
     ? ""
-    : `\n\nThe user lives in ${st.name}, not Louisiana. They are practicing with Louisiana's form as a sample; ${st.name} has its own application. Wherever the rules above say Louisiana or LaSHIP, use ${st.name} and its Medicaid office instead: ${st.agency}, ${st.phone}, ${st.url}. For free counseling, point to shiphelp.org or 1-800-MEDICARE (${NATIONAL.medicare.phone}). Do not state ${st.name}'s rules or limits; say ${st.name}'s office decides. Do not apply Louisiana-only facts (like Louisiana not counting savings) to ${st.name}.`;
+    : form
+      ? `\n\nThe user lives in ${st.name}, not Louisiana. ${
+          form.own
+            ? `They opened their own PDF form titled "${form.title}".`
+            : form.model
+              ? `They are practicing with the federal CMS model Medicare Savings Program application, because ${st.name}'s own application isn't built in.`
+              : `They are looking at ${st.name}'s own application: "${form.title}" (${form.formId}).`
+        } The FORM SPEC above describes Louisiana's form, so do not refer to its section or page numbers; explain the user's form from the words they quote. Wherever the rules above say Louisiana or LaSHIP, use ${st.name} and its Medicaid office instead: ${st.agency}, ${st.phone}, ${st.url}. For free counseling, point to shiphelp.org or 1-800-MEDICARE (${NATIONAL.medicare.phone}). Do not state ${st.name}'s rules or limits; say ${st.name}'s office decides.${
+          form.line ? `\n\nThe user just tapped this line on the form: "${form.line}"${form.topic ? ` (it looks like it's about: ${form.topic})` : ""}.` : ""
+        }`
+      : `\n\nThe user lives in ${st.name}, not Louisiana. They are practicing with Louisiana's form as a sample; ${st.name} has its own application. Wherever the rules above say Louisiana or LaSHIP, use ${st.name} and its Medicaid office instead: ${st.agency}, ${st.phone}, ${st.url}. For free counseling, point to shiphelp.org or 1-800-MEDICARE (${NATIONAL.medicare.phone}). Do not state ${st.name}'s rules or limits; say ${st.name}'s office decides. Do not apply Louisiana-only facts (like Louisiana not counting savings) to ${st.name}.`;
 
-  const context = field
+  const context = field && !form
     ? `\n\nThe user is currently looking at the field "${field.label}" (id ${field.id}) in section "${SECTIONS.find((s) => s.id === field.section)?.title}".`
     : "";
 
@@ -85,7 +105,7 @@ export async function POST(req: Request) {
         if (!sent) throw new Error("empty response");
       } catch (error) {
         console.error("chat model error", error);
-        if (!sent) controller.enqueue(encoder.encode(localAnswer(question, field?.id, st.code)));
+        if (!sent) controller.enqueue(encoder.encode(localAnswer(question, form ? undefined : field?.id, st.code, form?.line)));
       }
       controller.close();
     },

@@ -5,7 +5,7 @@ import { Phone, X } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useSpeech } from "@/lib/speech";
 import Avatar from "./Avatar";
-import Chat from "./Chat";
+import Chat, { type FormContext } from "./Chat";
 import HelpDialog from "./HelpDialog";
 import type { Aid, Progress } from "@/contract/spec-types";
 
@@ -23,11 +23,12 @@ type Props = {
   openSignal?: number;
   /** Distance from the bottom of the screen, so the button can sit above a bottom sheet on phones. */
   bottom?: string;
+  form?: FormContext;
 };
 
 // Dr. Fawn floats in the corner on every screen. Tapping him opens the chat.
 // The chat stays mounted while closed, so the conversation isn't lost.
-export default function AskFawn({ fieldId, localFieldId, progress, onAid, request, openSignal, bottom = "1.25rem" }: Props) {
+export default function AskFawn({ fieldId, localFieldId, progress, onAid, request, openSignal, bottom = "1.25rem", form }: Props) {
   const { ui } = useI18n();
   const { speaking } = useSpeech();
   const [open, setOpen] = useState(false);
@@ -105,7 +106,7 @@ export default function AskFawn({ fieldId, localFieldId, progress, onAid, reques
             <X size={24} />
           </button>
         </header>
-        <Chat fieldId={fieldId} localFieldId={localFieldId} progress={progress} pending={pending} onPerson={() => setHelpOpen(true)} onAid={onAid} />
+        <Chat fieldId={fieldId} localFieldId={localFieldId} progress={progress} pending={pending} onPerson={() => setHelpOpen(true)} onAid={onAid} form={form} />
       </section>
       {helpOpen && <HelpDialog onClose={() => setHelpOpen(false)} />}
 
@@ -135,4 +136,18 @@ export default function AskFawn({ fieldId, localFieldId, progress, onAid, reques
       </div>
     </>
   );
+}
+
+// On phones Dr. Fawn sits just above the bottom sheet; on desktop he sits in the corner.
+export function MobileAwareFawn({ sheetOpen, ...rest }: Omit<Props, "bottom"> & { sheetOpen: boolean }) {
+  const [desktop, setDesktop] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  const bottom = desktop ? "1.25rem" : sheetOpen ? "calc(60dvh + 0.5rem)" : "calc(92px + 0.5rem)";
+  return <AskFawn {...rest} bottom={bottom} />;
 }

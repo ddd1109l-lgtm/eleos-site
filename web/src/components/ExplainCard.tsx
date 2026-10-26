@@ -174,7 +174,7 @@ export default function ExplainCard({ steps, onAnswer, onDone, aid, onCloseAid, 
   );
 }
 
-function Badge({ className, icon, children }: { className: string; icon: React.ReactNode; children: React.ReactNode }) {
+export function Badge({ className, icon, children }: { className: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className={`flex items-start gap-2.5 rounded-2xl border-2 px-3.5 py-2.5 text-[1rem] font-bold ${className}`}>
       <span className="mt-0.5 shrink-0" aria-hidden>
@@ -273,7 +273,7 @@ function StepActions({ steps, onAnswer, onDone }: { steps: Step[]; onAnswer: (id
 }
 
 // Shown only when the shared engine reports complete: true.
-function Finish({ onClear, onStartOver, onPerson }: { onClear: () => void; onStartOver: () => void; onPerson: () => void }) {
+export function Finish({ onClear, onStartOver, onPerson }: { onClear: () => void; onStartOver: () => void; onPerson: () => void }) {
   const { ui, t, lang } = useI18n();
   const st = useUsState();
   // Louisiana's ways to apply are on its form; every other state applies through its own office.

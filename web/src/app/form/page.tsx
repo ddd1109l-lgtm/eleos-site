@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import GuideApp from "@/components/GuideApp";
+import FormRouter from "@/components/FormRouter";
 
 export const metadata: Metadata = {
   title: "Form steps · Eleos",
 };
 
 export default function FormPage() {
-  return <GuideApp />;
+  return <FormRouter />;
 }

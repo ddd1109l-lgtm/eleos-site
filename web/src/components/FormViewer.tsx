@@ -2,41 +2,62 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import { FORM, fieldAt, type Box } from "@/data/form";
+import type { Box } from "@/data/form";
 import { splitTerms } from "@/lib/terms";
 import { useI18n } from "@/i18n/I18nProvider";
 
-const PAGE_W = 612;
-const PAGE_H = 792;
-
-export type Pick = { page: number; x: number; y: number; term?: string; word?: string };
+/** The line of text that was tapped: its words and its box in PDF points (top-left origin). */
+export type Line = { text: string; box: Box; /** The single text run that was tapped, like one table header cell. */ run?: { text: string; box: Box } };
+export type Pick = { page: number; x: number; y: number; term?: string; word?: string; line?: Line };
 
 type Props = {
+  /** Any PDF: Louisiana's built-in form, another state's form, or one the user opened. */
+  pdf: string;
+  /** Only show the first pages (Louisiana's packet has extra pages after the application). */
+  maxPages?: number;
   highlight?: Box;
   activeTerm?: string;
   showTerms: boolean;
   scrollTarget?: { box: Box; nonce: number };
+  /** Region to outline while hovering, when the form has known field regions. */
+  hoverAt?: (page: number, x: number, y: number) => Box | undefined;
   onPick: (pick: Pick) => void;
   onAskSelection: (text: string) => void;
+  onPageCount?: (n: number) => void;
 };
 
-export default function FormViewer({ highlight, activeTerm, showTerms, scrollTarget, onPick, onAskSelection }: Props) {
+type Size = { w: number; h: number };
+
+export default function FormViewer({ pdf, maxPages, highlight, activeTerm, showTerms, scrollTarget, hoverAt, onPick, onAskSelection, onPageCount }: Props) {
   const { ui } = useI18n();
   const wrapRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [doc, setDoc] = useState<PDFDocumentProxy>();
+  const [sizes, setSizes] = useState<Size[]>([]);
   const [error, setError] = useState(false);
   const [width, setWidth] = useState(0);
   const [selection, setSelection] = useState<{ text: string; top: number; left: number }>();
 
   useEffect(() => {
     let cancelled = false;
+    let task: { destroy: () => Promise<void> } | undefined;
     (async () => {
       try {
         const pdfjs = await import("pdfjs-dist");
         pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-        const loaded = await pdfjs.getDocument({ url: FORM.pdf }).promise;
-        if (!cancelled) setDoc(loaded);
+        const loading = pdfjs.getDocument({ url: pdf });
+        task = loading;
+        const loaded = await loading.promise;
+        const count = Math.min(loaded.numPages, maxPages ?? loaded.numPages);
+        const all: Size[] = [];
+        for (let i = 1; i <= count; i++) {
+          const [x0, y0, x1, y1] = (await loaded.getPage(i)).view;
+          all.push({ w: x1 - x0, h: y1 - y0 });
+        }
+        if (cancelled) return;
+        setSizes(all);
+        setDoc(loaded);
+        onPageCount?.(count);
       } catch (e) {
         console.error(e);
         if (!cancelled) setError(true);
@@ -44,8 +65,10 @@ export default function FormViewer({ highlight, activeTerm, showTerms, scrollTar
     })();
     return () => {
       cancelled = true;
+      void task?.destroy();
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdf, maxPages]);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -64,18 +87,19 @@ export default function FormViewer({ highlight, activeTerm, showTerms, scrollTar
     };
   }, []);
 
-  const scale = width / PAGE_W;
+  const scaleFor = (i: number) => (sizes[i] ? width / sizes[i].w : 1);
 
   useEffect(() => {
-    if (!scrollTarget || !scale) return;
+    if (!scrollTarget || !width) return;
     const { box } = scrollTarget;
-    const pageEl = pageRefs.current[(box.page || 1) - 1];
+    const i = (box.page || 1) - 1;
+    const pageEl = pageRefs.current[i];
     const scroller = wrapRef.current?.closest("[data-scroller]") as HTMLElement | null;
     if (!pageEl || !scroller) return;
     const pageTop = pageEl.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
-    const top = pageTop + box.y0 * scale - 72;
-    scroller.scrollTo({ top, behavior: "smooth" });
-  }, [scrollTarget, scale]);
+    scroller.scrollTo({ top: pageTop + box.y0 * scaleFor(i) - 72, behavior: "smooth" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scrollTarget, width]);
 
   // Show an "Ask about this" button when the user highlights text on the form.
   const onMouseUp = useCallback(() => {
@@ -94,24 +118,29 @@ export default function FormViewer({ highlight, activeTerm, showTerms, scrollTar
     <div ref={wrapRef} className="relative mx-auto w-full max-w-[920px]" onMouseUp={onMouseUp}>
       {error && (
         <div className="card p-6 text-lg">
-          {ui("formError")} <a className="text-accent underline" href={FORM.pdf}>{ui("openPdf")}</a>
+          {ui("formError")}{" "}
+          <a className="text-accent underline" href={pdf} target="_blank" rel="noreferrer">
+            {ui("openPdf")}
+          </a>
         </div>
       )}
       {!doc && !error && <PageSkeleton label={ui("loadingForm")} />}
       {doc &&
         width > 0 &&
-        Array.from({ length: FORM.pages }, (_, i) => (
+        sizes.map((size, i) => (
           <PdfPage
-            key={i}
+            key={`${pdf}-${i}`}
             ref={(el) => {
               pageRefs.current[i] = el;
             }}
             doc={doc}
             pageNumber={i + 1}
-            scale={scale}
+            size={size}
+            scale={scaleFor(i)}
             highlight={highlight && (highlight.page === i + 1 || highlight.page === 0) ? highlight : undefined}
             activeTerm={activeTerm}
             showTerms={showTerms}
+            hoverAt={hoverAt}
             onPick={onPick}
           />
         ))}
@@ -145,20 +174,34 @@ function PageSkeleton({ label }: { label: string }) {
 type PageProps = {
   doc: PDFDocumentProxy;
   pageNumber: number;
+  size: Size;
   scale: number;
   highlight?: Box;
   activeTerm?: string;
   showTerms: boolean;
+  hoverAt?: (page: number, x: number, y: number) => Box | undefined;
   onPick: (pick: Pick) => void;
   ref: (el: HTMLDivElement | null) => void;
 };
 
-function PdfPage({ doc, pageNumber, scale, highlight, activeTerm, showTerms, onPick, ref }: PageProps) {
+function PdfPage({ doc, pageNumber, size, scale, highlight, activeTerm, showTerms, hoverAt, onPick, ref }: PageProps) {
+  const boxRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<Box>();
+  // Long forms (some states' run 40 pages) only draw pages that are on or near the screen.
+  const [visible, setVisible] = useState(pageNumber <= 2);
 
   useEffect(() => {
+    const el = boxRef.current;
+    if (!el || visible) return;
+    const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && setVisible(true), { rootMargin: "800px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [visible]);
+
+  useEffect(() => {
+    if (!visible) return;
     let cancelled = false;
     let renderTask: { cancel: () => void; promise: Promise<unknown> } | undefined;
     (async () => {
@@ -193,7 +236,7 @@ function PdfPage({ doc, pageNumber, scale, highlight, activeTerm, showTerms, onP
       cancelled = true;
       renderTask?.cancel();
     };
-  }, [doc, pageNumber, scale]);
+  }, [doc, pageNumber, scale, visible]);
 
   useEffect(() => {
     textRef.current?.querySelectorAll(".t.on").forEach((el) => el.classList.remove("on"));
@@ -210,15 +253,21 @@ function PdfPage({ doc, pageNumber, scale, highlight, activeTerm, showTerms, onP
 
   return (
     <div
-      ref={ref}
+      ref={(el) => {
+        boxRef.current = el;
+        ref(el);
+      }}
       data-page={pageNumber}
       className={`relative mb-6 overflow-hidden rounded-xl border-2 border-ink bg-white shadow-[0_5px_0_var(--ink)] ${showTerms ? "" : "form-hidden-terms"}`}
-      style={{ width: PAGE_W * scale, height: PAGE_H * scale }}
-      onMouseMove={(e) => {
-        const { x, y } = toPdf(e);
-        const f = fieldAt(pageNumber, x, y);
-        setHover(f?.box);
-      }}
+      style={{ width: size.w * scale, height: size.h * scale }}
+      onMouseMove={
+        hoverAt
+          ? (e) => {
+              const { x, y } = toPdf(e);
+              setHover(hoverAt(pageNumber, x, y));
+            }
+          : undefined
+      }
       onMouseLeave={() => setHover(undefined)}
       onClick={(e) => {
         if (window.getSelection()?.toString().trim()) return;
@@ -226,18 +275,14 @@ function PdfPage({ doc, pageNumber, scale, highlight, activeTerm, showTerms, onP
         const target = e.target as HTMLElement;
         const term = target.closest<HTMLElement>("[data-term]")?.dataset.term;
         const word = target.closest(".w, .t")?.textContent ?? undefined;
-        onPick({ page: pageNumber, x, y, term, word });
+        const line = lineAt(textRef.current, e.currentTarget.getBoundingClientRect(), scale, target, y);
+        onPick({ page: pageNumber, x, y, term, word, line });
       }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" aria-hidden />
       {hover && hover !== highlight && <BoxDiv className="hoverbox" box={hover} scale={scale} />}
       {highlight && <BoxDiv className="spotlight" box={highlight} scale={scale} key={`${highlight.x0}-${highlight.y0}`} />}
-      <div
-        ref={textRef}
-        className="textLayer"
-        style={{ "--total-scale-factor": scale } as React.CSSProperties}
-        aria-label={`Form page ${pageNumber}`}
-      />
+      <div ref={textRef} className="textLayer" style={{ "--total-scale-factor": scale } as React.CSSProperties} aria-label={`Form page ${pageNumber}`} />
     </div>
   );
 }
@@ -254,6 +299,49 @@ function BoxDiv({ box, scale, className }: { box: Box; scale: number; className:
       }}
     />
   );
+}
+
+/**
+ * The tapped line: every text run on the same row as the tap, joined left to right, with the box
+ * around them. Works on any PDF, so forms without hand-made field regions still get a spotlight.
+ */
+function lineAt(layer: HTMLDivElement | null, pageRect: DOMRect, scale: number, target: HTMLElement, tapY: number): Line | undefined {
+  if (!layer) return;
+  const runs = [...layer.querySelectorAll<HTMLElement>(":scope > span, .markedContent > span")].filter((r) => r.textContent?.trim());
+  const rects = runs.map((r) => ({ r, b: r.getBoundingClientRect() }));
+  const hit = target.closest<HTMLElement>(".textLayer > span, .markedContent > span");
+  const anchor = (hit && rects.find((x) => x.r === hit)) ?? rects.map((x) => ({ ...x, d: Math.abs((x.b.top + x.b.bottom) / 2 - pageRect.top - tapY * scale) })).sort((a, b) => a.d - b.d)[0];
+  if (!anchor || ("d" in anchor && (anchor as { d: number }).d > 24 * scale)) return;
+  const mid = (anchor.b.top + anchor.b.bottom) / 2;
+  const tol = Math.max(anchor.b.height * 0.6, 3);
+  const row = rects.filter((x) => Math.abs((x.b.top + x.b.bottom) / 2 - mid) < tol).sort((a, b) => a.b.left - b.b.left);
+  const text = row.map((x) => x.r.textContent?.trim()).join(" ").replace(/\s+/g, " ").trim();
+  if (!text) return;
+  const toPts = (v: number, o: number) => (v - o) / scale;
+  const pad = 3;
+  const runText = anchor.r.textContent?.replace(/\s+/g, " ").trim();
+  return {
+    run: runText
+      ? {
+          text: runText.slice(0, 400),
+          box: {
+            page: 0,
+            x0: Math.max(0, toPts(anchor.b.left, pageRect.left) - pad),
+            y0: Math.max(0, toPts(anchor.b.top, pageRect.top) - pad),
+            x1: toPts(anchor.b.right, pageRect.left) + pad,
+            y1: toPts(anchor.b.bottom, pageRect.top) + pad,
+          },
+        }
+      : undefined,
+    text: text.slice(0, 400),
+    box: {
+      page: 0,
+      x0: Math.max(0, toPts(Math.min(...row.map((x) => x.b.left)), pageRect.left) - pad),
+      y0: Math.max(0, toPts(Math.min(...row.map((x) => x.b.top)), pageRect.top) - pad),
+      x1: toPts(Math.max(...row.map((x) => x.b.right)), pageRect.left) + pad,
+      y1: toPts(Math.max(...row.map((x) => x.b.bottom)), pageRect.top) + pad,
+    },
+  };
 }
 
 // Split each pdf.js text run into glossary terms and single words so each one is clickable.

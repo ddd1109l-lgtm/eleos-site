@@ -927,7 +927,7 @@ export const GENERIC_MESSAGES = [
 ];
 
 export const GENERIC_NEXT_STEPS = [
-  "Get your state's application from the office listed here, or ask them to mail you one.",
+  "Print your state's form from this page, or ask your state's office to mail you the newest copy.",
   "Use what you learned here to fill it out on paper, then sign it.",
   "Send it the way your state's office tells you, and keep a copy for yourself.",
   "Your state will mail you a decision. Watch your mailbox.",
