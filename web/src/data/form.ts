@@ -918,6 +918,21 @@ export const NEXT_STEPS = [
   "Many people who get QMB also qualify for full Medicaid. A free counselor can check.",
 ];
 
+// For every state other than Louisiana. Based on Medicare.gov "Medicare Savings Programs" (checked 2026-10-26).
+export const GENERIC_MESSAGES = [
+  "Not sure if you qualify? Apply anyway. Your state makes the decision, and it's free.",
+  "Some states don't count certain income or savings, and some have higher limits. Your state will check for you.",
+  "You can also apply for Extra Help through Social Security (1-800-772-1213). That starts your state's application too.",
+  "People who get a Medicare Savings Program may also qualify for full Medicaid. A free counselor can check.",
+];
+
+export const GENERIC_NEXT_STEPS = [
+  "Get your state's application from the office listed here, or ask them to mail you one.",
+  "Use what you learned here to fill it out on paper, then sign it.",
+  "Send it the way your state's office tells you, and keep a copy for yourself.",
+  "Your state will mail you a decision. Watch your mailbox.",
+];
+
 // Engine fields that share a spot on the page with another question, so they need their own label.
 export const EXTRA_SPEC_LABELS: Record<string, string> = {
   s2_home_different: "Is your home address different from your mailing address?",
@@ -965,6 +980,7 @@ export const SUGGESTED_QUESTIONS = [
   "Do I need to list my savings?",
   "Where do I find my Medicare number?",
   "What happens after I mail this?",
+  "Can I fill out the form on this website?",
 ];
 
 export function sectionById(id: string) {

@@ -1,4 +1,4 @@
-import { DOCUMENTS, EXTRA_SPEC_LABELS, FIELDS, FORM, MESSAGES, NEXT_STEPS, SECTIONS, SUBMIT_WAYS, SUGGESTED_QUESTIONS, TERMS, type Field, type Section, type Term } from "@/data/form";
+import { DOCUMENTS, EXTRA_SPEC_LABELS, FIELDS, FORM, GENERIC_MESSAGES, GENERIC_NEXT_STEPS, MESSAGES, NEXT_STEPS, SECTIONS, SUBMIT_WAYS, SUGGESTED_QUESTIONS, TERMS, type Field, type Section, type Term } from "@/data/form";
 import { PRIVACY_NOTE } from "@/lib/privacy";
 
 // Every piece of interface text. Translations use the same keys (prefixed "ui.").
@@ -7,10 +7,15 @@ export const UI = {
   tagline: "Help paying for Medicare, one plain-language step at a time",
   chooseLanguage: "Choose your language",
   otherLanguage: "Another language",
-  otherPlaceholder: "Type any language, like Polish",
+  otherPlaceholder: "Type a language, like Italian",
+  useTyped: "Use \u201c{text}\u201d",
+  ready: "Ready",
   useLanguage: "Use this language",
   translating: "Translating…",
-  translateFail: "Sorry, I couldn't translate right now. Showing English.",
+  translateFail: "Sorry, I couldn't translate into {lang} on this device. Showing English. Try Chrome on a computer, or pick a language marked Ready.",
+  chooseState: "Choose your state",
+  statePlaceholder: "Type your state, like Texas",
+  formBuiltIn: "Form built in",
   readAloud: "Read aloud",
   readAloudOn: "Read aloud: on",
   readAloudOff: "Read aloud: off",
@@ -26,9 +31,23 @@ export const UI = {
   preferPerson: "Prefer a real person? Free counselors",
   home: "Home",
 
-  heroKicker: "Louisiana Medicare Savings Program",
+  heroKicker: "Medicare Savings Programs · {state}",
   heroTitle: "Get help paying for Medicare.",
-  heroBody: "I'll walk you through Louisiana's application in plain words. Tap any word on the form to see what it means, and ask me anything along the way.",
+  heroBody: "I'll teach you how to fill out your Medicare Savings Program application, in plain words. Tap any word on the form to see what it means, and ask me anything along the way.",
+  guideOnlyTitle: "This is a guide, not the application",
+  guideOnlyBody: "Dr. Fawn teaches you how to fill out the form. You can't fill out or send the form on this website. Write your answers on the paper form, then send it to your state.",
+  sampleTitle: "You're practicing with Louisiana's form",
+  sampleBody: "{state} has its own application, but most states ask the same kinds of questions. Learn here, then fill out the application for {state}. You can get it from {agency}.",
+  yourStateTitle: "How to apply in {state}",
+  yourStateBody: "Each state runs its own Medicare Savings Program. In {state}, it's run by:",
+  callLabel: "Call",
+  ttyLabel: "TTY",
+  shipTitle: "Free Medicare counseling (SHIP)",
+  shipBody: "Every state has free, private counselors who help people with Medicare, and they can help you fill out your state's form.",
+  findShip: "Find your state's counselors",
+  medicareLineTitle: "1-800-MEDICARE",
+  medicareLineBody: "Medicare's own help line can tell you how to reach your state's office.",
+  statePracticeNote: "Practice form: Louisiana",
   startForm: "Open the form steps",
   continueForm: "Continue where I left off",
   aboutTitle: "About me",
@@ -38,7 +57,7 @@ export const UI = {
   promiseTitle: "My promises to you",
   promise1: "You fill out the paper form yourself. I just explain.",
   promise2: "I never ask for your Social Security or Medicare number.",
-  promise3: "I never decide if you qualify. Louisiana does.",
+  promise3: "I never decide if you qualify. Your state does.",
   promise4: "I'm here 24/7, and free human counselors are one tap away.",
   howTitle: "How it works",
   how1Title: "Gather your papers",
@@ -88,7 +107,7 @@ export const UI = {
   whatItAsks: "What it asks",
   theQuestion: "The question",
   wordOnForm: "Word on the form",
-  highlights: "Highlights",
+  highlights: "Highlight words",
   onPaper: "On the paper form it says",
   privateBadge: "Keep this private. Write it on the paper form only, not here.",
   healthBadge: "This part is about medical bills. I'll explain the questions, but I won't ask about your health.",
@@ -152,6 +171,8 @@ export function englishStrings(): Record<string, string> {
   SUGGESTED_QUESTIONS.forEach((q, i) => (out[`q.${i}`] = q));
   MESSAGES.forEach((m, i) => (out[`m.${i}`] = m));
   NEXT_STEPS.forEach((m, i) => (out[`n.${i}`] = m));
+  GENERIC_MESSAGES.forEach((m, i) => (out[`g.${i}`] = m));
+  GENERIC_NEXT_STEPS.forEach((m, i) => (out[`gn.${i}`] = m));
   for (const [id, label] of Object.entries(EXTRA_SPEC_LABELS)) out[`sf.${id}`] = label;
   SUBMIT_WAYS.forEach((w, i) => {
     out[`w.${i}.how`] = w.how;
@@ -176,7 +197,7 @@ export function makeTranslator(dict?: Record<string, string>): Translator {
     t,
     ui: (key, vars) => {
       let s = t(`ui.${key}`);
-      for (const [k, v] of Object.entries(vars ?? {})) s = s.replace(`{${k}}`, String(v));
+      for (const [k, v] of Object.entries(vars ?? {})) s = s.replaceAll(`{${k}}`, String(v));
       return s;
     },
     field: (f, k) => (f[k] ? t(`f.${f.id}.${k}`) : undefined),

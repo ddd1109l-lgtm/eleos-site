@@ -87,7 +87,7 @@ export default function Chat({ fieldId, localFieldId, progress, pending, onPerso
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history, fieldId, localFieldId, progress, language: lang.name }),
+        body: JSON.stringify({ messages: history, fieldId, localFieldId, progress, language: lang.name, state: getPrefs().state }),
       });
       if (!res.ok || !res.body) throw new Error(`chat ${res.status}`);
       const reader = res.body.getReader();

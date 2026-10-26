@@ -1,11 +1,12 @@
 "use client";
 
 import { ArrowRightLeft, Check, CircleHelp, FileText, HeartPulse, LifeBuoy, Lightbulb, Lock, MessageCircleQuestion, PartyPopper, Phone, Printer, RotateCcw, Volume2, X } from "lucide-react";
-import { DOCUMENTS, EXTRA_SPEC_LABELS, FIELDS, NEXT_STEPS, SUBMIT_WAYS, type Field, type Section, type Term } from "@/data/form";
+import { DOCUMENTS, EXTRA_SPEC_LABELS, FIELDS, GENERIC_NEXT_STEPS, NEXT_STEPS, SUBMIT_WAYS, type Field, type Section, type Term } from "@/data/form";
 import type { Aid } from "@/contract/spec-types";
 import type { SpecField } from "@/lib/progress";
 import { localFieldFor } from "@/lib/progress";
 import AidViewer from "./AidViewer";
+import StateHelp, { useUsState } from "./StateHelp";
 import { useI18n } from "@/i18n/I18nProvider";
 import { speak } from "@/lib/speech";
 import Avatar from "./Avatar";
@@ -274,7 +275,11 @@ function StepActions({ steps, onAnswer, onDone }: { steps: Step[]; onAnswer: (id
 // Shown only when the shared engine reports complete: true.
 function Finish({ onClear, onStartOver, onPerson }: { onClear: () => void; onStartOver: () => void; onPerson: () => void }) {
   const { ui, t, lang } = useI18n();
-  const text = [ui("doneTitle"), ...SUBMIT_WAYS.map((_, i) => `${t(`w.${i}.how`)}: ${t(`w.${i}.detail`)}`), ui("nextStepsTitle"), ...NEXT_STEPS.map((_, i) => t(`n.${i}`)), ui("applyAnyway")].join(". ");
+  const st = useUsState();
+  // Louisiana's ways to apply are on its form; every other state applies through its own office.
+  const stepKeys = st.hasForm ? NEXT_STEPS.map((_, i) => `n.${i}`) : GENERIC_NEXT_STEPS.map((_, i) => `gn.${i}`);
+  const ways = st.hasForm ? SUBMIT_WAYS.map((_, i) => `${t(`w.${i}.how`)}: ${t(`w.${i}.detail`)}`) : [`${st.agency}: ${st.phone}`];
+  const text = [ui("doneTitle"), ...ways, ui("nextStepsTitle"), ...stepKeys.map((k) => t(k)), ui("applyAnyway")].join(". ");
   return (
     <div className="rise space-y-4" dir={lang.rtl ? "rtl" : "ltr"}>
       <div className="flex items-start justify-between gap-3">
@@ -286,8 +291,8 @@ function Finish({ onClear, onStartOver, onPerson }: { onClear: () => void; onSta
         </button>
       </div>
       <h2 className="font-display text-[1.6rem] font-bold leading-snug text-accent-ink">{ui("doneTitle")}</h2>
-      <p className="text-[1.1rem] leading-relaxed">{ui("finishBody")}</p>
-      <ul className="space-y-2">
+      {st.hasForm ? <p className="text-[1.1rem] leading-relaxed">{ui("finishBody")}</p> : <StateHelp compact />}
+      <ul className={`space-y-2 ${st.hasForm ? "" : "hidden"}`}>
         {SUBMIT_WAYS.map((w, i) => {
           const phone = (w.how === "Phone" || w.how === "Fax") && w.detail.match(/1-\d{3}-\d{3}-\d{4}/)?.[0];
           return (
@@ -310,9 +315,9 @@ function Finish({ onClear, onStartOver, onPerson }: { onClear: () => void; onSta
       <div className="rounded-2xl bg-mint-soft p-4">
         <p className="font-display text-[1.1rem] font-bold">{ui("nextStepsTitle")}</p>
         <ul className="mt-1.5 list-disc space-y-1.5 ps-5">
-          {NEXT_STEPS.map((_, i) => (
-            <li key={i} className="text-[1.02rem] leading-relaxed">
-              {t(`n.${i}`)}
+          {stepKeys.map((k) => (
+            <li key={k} className="text-[1.02rem] leading-relaxed">
+              {t(k)}
             </li>
           ))}
         </ul>

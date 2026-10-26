@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { Check, ChevronDown, ChevronUp, Circle, CircleDot, Highlighter, Lock, Send, Star } from "lucide-react";
 import { EXTRA_SPEC_LABELS, FIELDS, FORM, SECTIONS, fieldAt, sectionAt, sectionById, type Box } from "@/data/form";
 import type { Aid } from "@/contract/spec-types";
+import { telHref } from "@/data/states";
 import { useI18n } from "@/i18n/I18nProvider";
 import { lookupTerm } from "@/lib/terms";
 import { getPrefs } from "@/lib/prefs";
@@ -13,6 +14,7 @@ import { speak, speakItems, type SpeakItem } from "@/lib/speech";
 import AskFawn from "./AskFawn";
 import ExplainCard, { fieldsIn, type Step } from "./ExplainCard";
 import HelpDialog from "./HelpDialog";
+import { GuideOnlyNotice, useUsState } from "./StateHelp";
 import TopBar from "./TopBar";
 import type { Pick } from "./FormViewer";
 
@@ -28,6 +30,7 @@ const nonce = () => ++counter;
 export default function GuideApp() {
   const tr = useI18n();
   const { ui, lang } = tr;
+  const st = useUsState();
   const { progress, engine, answer, markDone, reset } = useProgress();
   const [selected, setSelected] = useState<Selected>({});
   const [scrollTarget, setScrollTarget] = useState<{ box: Box; nonce: number }>();
@@ -333,6 +336,9 @@ export default function GuideApp() {
           <div className="px-3 pt-5 sm:px-5 lg:px-8 lg:pt-7">
             <div className="mx-auto mb-5 flex max-w-[920px] flex-wrap items-end justify-between gap-3">
               <div>
+                {!st.hasForm && (
+                  <p className="mb-1 inline-flex rounded-full border-2 border-ink bg-sun px-3 py-0.5 text-[0.88rem] font-bold">{ui("statePracticeNote")}</p>
+                )}
                 <h1 className="font-display text-[1.7rem] font-bold leading-tight text-accent-ink lg:text-[2rem]">{tr.t("form.name")}</h1>
                 <p className="mt-1 text-[1rem] text-ink-2">
                   {FORM.code} · {ui("formBy")} ·{" "}
@@ -349,6 +355,23 @@ export default function GuideApp() {
               >
                 <Highlighter size={18} aria-hidden /> {ui("highlights")}
               </button>
+            </div>
+            <div className="mx-auto mb-5 max-w-[920px] space-y-3">
+              <GuideOnlyNotice />
+              {!st.hasForm && (
+                <div role="note" className="rounded-2xl border-2 border-ink bg-sky-soft px-4 py-3">
+                  <p className="font-display text-[1.08rem] font-bold">{ui("sampleTitle")}</p>
+                  <p className="text-[0.98rem] leading-relaxed text-ink-2">{ui("sampleBody", { state: st.name, agency: st.agency })}</p>
+                  <p className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[0.98rem] font-bold">
+                    <a href={telHref(st.phone)} className="text-accent underline underline-offset-2">
+                      {ui("callLabel")} {st.phone}
+                    </a>
+                    <a href={st.url} target="_blank" rel="noreferrer" className="text-accent underline underline-offset-2">
+                      {ui("visitWebsite")}
+                    </a>
+                  </p>
+                </div>
+              )}
             </div>
             <FormViewer
               highlight={highlight}

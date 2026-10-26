@@ -4,10 +4,13 @@ import { useEffect } from "react";
 import { Phone, X } from "lucide-react";
 import { HELP } from "@/data/form";
 import { useI18n } from "@/i18n/I18nProvider";
+import StateHelp, { useUsState } from "./StateHelp";
 
-// Free human help (LaSHIP and Medicaid), reachable from the chat at any time.
+// Free human help, reachable from the chat at any time. Louisiana keeps its verified local lines;
+// every other state gets its Medicaid office plus the national SHIP and 1-800-MEDICARE.
 export default function HelpDialog({ onClose }: { onClose: () => void }) {
   const { ui } = useI18n();
+  const st = useUsState();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -40,7 +43,12 @@ export default function HelpDialog({ onClose }: { onClose: () => void }) {
             <X size={24} />
           </button>
         </div>
-        <ul className="mt-5 space-y-3">
+        {!st.hasForm && (
+          <div className="mt-5">
+            <StateHelp compact />
+          </div>
+        )}
+        <ul className={`mt-5 space-y-3 ${st.hasForm ? "" : "hidden"}`}>
           {lines.map((l) => (
             <li key={l.title} className={`rounded-2xl border-2 border-ink p-4 ${l.color}`}>
               <p className="font-display text-[1.15rem] font-bold">{l.title}</p>

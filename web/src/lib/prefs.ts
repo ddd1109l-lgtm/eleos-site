@@ -2,10 +2,10 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 
-// Per-device preferences (read-aloud mode and text size), kept in localStorage.
-type Prefs = { autoRead: boolean; scale: number };
+// Per-device preferences (read-aloud mode, text size and the user's state), kept in localStorage.
+type Prefs = { autoRead: boolean; scale: number; state: string };
 
-const DEFAULTS: Prefs = { autoRead: false, scale: 0 };
+const DEFAULTS: Prefs = { autoRead: false, scale: 0, state: "LA" };
 let prefs: Prefs = DEFAULTS;
 let loaded = false;
 const listeners = new Set<() => void>();

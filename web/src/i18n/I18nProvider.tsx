@@ -1,24 +1,11 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { FEATURED, resolveLanguage, type Language } from "./languages";
 import { EN, makeTranslator, type Translator } from "./strings";
 
-export type Language = { name: string; native: string; code: string; rtl?: boolean };
-
-export const LANGUAGES: Language[] = [
-  { name: "English", native: "English", code: "en-US" },
-  { name: "Spanish", native: "Español", code: "es-US" },
-  { name: "Vietnamese", native: "Tiếng Việt", code: "vi-VN" },
-  { name: "French", native: "Français", code: "fr-FR" },
-  { name: "Haitian Creole", native: "Kreyòl ayisyen", code: "ht-HT" },
-  { name: "Chinese (Simplified)", native: "简体中文", code: "zh-CN" },
-  { name: "Arabic", native: "العربية", code: "ar", rtl: true },
-  { name: "Korean", native: "한국어", code: "ko-KR" },
-  { name: "Tagalog", native: "Tagalog", code: "fil-PH" },
-  { name: "Portuguese", native: "Português", code: "pt-BR" },
-  { name: "Russian", native: "Русский", code: "ru-RU" },
-  { name: "Hindi", native: "हिन्दी", code: "hi-IN" },
-];
+export type { Language } from "./languages";
+export const LANGUAGES = FEATURED;
 
 // Spanish and Vietnamese (the languages the paper form offers), French and Haitian Creole ship
 // with the app, so they work offline. Every other language is translated on demand and cached on this device.
@@ -34,19 +21,23 @@ type Status = "idle" | "loading" | "error";
 type Ctx = Translator & {
   lang: Language;
   status: Status;
+  /** The language that last failed to translate, for the error message. */
+  failed?: string;
   setLanguage: (lang: Language) => void;
 };
 
 const I18nContext = createContext<Ctx | null>(null);
 
-const cacheKey = (name: string) => `eleos-i18n-v1-${name.toLowerCase()}`;
+const cacheKey = (name: string) => `eleos-i18n-v4-${name.toLowerCase()}`;
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLang] = useState<Language>(LANGUAGES[0]);
+  const [lang, setLang] = useState<Language>(FEATURED[0]);
   const [dict, setDict] = useState<Record<string, string>>();
   const [status, setStatus] = useState<Status>("idle");
+  const [failed, setFailed] = useState<string>();
 
-  const setLanguage = useCallback(async (next: Language) => {
+  const setLanguage = useCallback(async (picked: Language) => {
+    const next = resolveLanguage(picked);
     try {
       localStorage.setItem("eleos-lang", JSON.stringify(next));
     } catch {}
@@ -64,9 +55,13 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       setStatus("idle");
     } catch (e) {
       console.error("translation failed", e);
+      setFailed(next.name);
       setStatus("error");
-      setLang(LANGUAGES[0]);
+      setLang(FEATURED[0]);
       setDict(undefined);
+      try {
+        localStorage.removeItem("eleos-lang");
+      } catch {}
     }
   }, []);
 
@@ -83,7 +78,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.lang = lang.code;
   }, [lang]);
 
-  const value = useMemo(() => ({ ...makeTranslator(dict), lang, status, setLanguage }), [dict, lang, status, setLanguage]);
+  const value = useMemo(() => ({ ...makeTranslator(dict), lang, status, failed, setLanguage }), [dict, lang, status, failed, setLanguage]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
@@ -104,7 +99,11 @@ async function loadDictionary(lang: Language): Promise<Loaded> {
     if (cached) return JSON.parse(cached);
   } catch {}
 
-  const loaded = await translateWithServer(lang).catch(() => translateInBrowser(lang));
+  // On-device translation first (private, free, and works without the AI), then the AI on the server.
+  const loaded = await translateInBrowser(lang).catch((e) => {
+    console.warn("browser translation unavailable", e);
+    return translateWithServer(lang);
+  });
   try {
     localStorage.setItem(cacheKey(lang.name), JSON.stringify(loaded));
   } catch {}
@@ -132,17 +131,37 @@ async function translateWithServer(lang: Language): Promise<Loaded> {
   return { strings, code: results[0]?.code, rtl: results[0]?.rtl };
 }
 
-// Fallback: Chrome's on-device Translator API, when the language has a known code.
+/** Names and numbers that stay the same in every language. */
+const KEEP_AS_IS = new Set(["ui.brand", "ui.medicareLineTitle", "ui.ttyLabel"]);
+
+// The browser's built-in, on-device Translator (Chrome on computers). It needs a language code.
 async function translateInBrowser(lang: Language): Promise<Loaded> {
   const T = (globalThis as unknown as { Translator?: TranslatorAPI }).Translator;
   if (!T || !lang.code) throw new Error("no browser translator");
-  const target = lang.code.split("-")[0];
-  const translator = await T.create({ sourceLanguage: "en", targetLanguage: target });
+  const target = lang.code === "zh-TW" ? "zh-Hant" : lang.code.split("-")[0];
+  const pair = { sourceLanguage: "en", targetLanguage: target };
+  if ((await T.availability(pair)) === "unavailable") throw new Error(`no on-device model for ${target}`);
+  const translator = await T.create(pair);
+  const entries = Object.entries(EN).filter(([k]) => !KEEP_AS_IS.has(k));
   const strings: Record<string, string> = {};
-  for (const [k, v] of Object.entries(EN)) strings[k] = await translator.translate(v);
+  // Placeholders like {state} are kept out of the text the translator sees, then put back.
+  const piece = async (part: string) => {
+    if (!part.trim() || /^\{\w+\}$/.test(part)) return part;
+    const [, lead, core, trail] = part.match(/^(\s*)([\s\S]*?)(\s*)$/)!;
+    return lead + (await translator.translate(core)) + trail;
+  };
+  const translate = async (v: string) => (await Promise.all(v.split(/(\{\w+\})/).map(piece))).join("");
+  for (let i = 0; i < entries.length; i += 25) {
+    await Promise.all(
+      entries.slice(i, i + 25).map(async ([k, v]) => {
+        strings[k] = await translate(v);
+      }),
+    );
+  }
   return { strings };
 }
 
 type TranslatorAPI = {
+  availability: (o: { sourceLanguage: string; targetLanguage: string }) => Promise<"unavailable" | "downloadable" | "downloading" | "available">;
   create: (o: { sourceLanguage: string; targetLanguage: string }) => Promise<{ translate: (s: string) => Promise<string> }>;
 };

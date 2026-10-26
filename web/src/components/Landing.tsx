@@ -4,17 +4,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, Heart, Lightbulb, MessageCircleQuestion, MousePointerClick, Send, ShieldCheck, Volume2, FileText } from "lucide-react";
-import { DOCUMENTS, MESSAGES } from "@/data/form";
+import { DOCUMENTS, GENERIC_MESSAGES, MESSAGES } from "@/data/form";
 import { useI18n } from "@/i18n/I18nProvider";
 import { loadProgress } from "@/lib/progress";
 import { speakItems } from "@/lib/speech";
 import AskFawn from "./AskFawn";
 import Avatar from "./Avatar";
 import MockDoc from "./MockDocs";
+import StateHelp, { GuideOnlyNotice, useUsState } from "./StateHelp";
 import TopBar from "./TopBar";
 
 export default function Landing() {
   const { ui, t, lang } = useI18n();
+  const st = useUsState();
+  // Louisiana's messages name its own rules; every other state gets the general ones.
+  const messageKeys = st.hasForm ? MESSAGES.map((_, i) => `m.${i}`) : GENERIC_MESSAGES.map((_, i) => `g.${i}`);
   const [hasProgress, setHasProgress] = useState(false);
 
   useEffect(() => {
@@ -37,7 +41,7 @@ export default function Landing() {
   const readPage = () =>
     speakItems(
       [
-        { text: `${ui("heroTitle")} ${ui("heroBody")}`, label: ui("heroTitle") },
+        { text: `${ui("heroTitle")} ${ui("heroBody")} ${ui("guideOnlyTitle")}. ${ui("guideOnlyBody")}`, label: ui("heroTitle") },
         { text: `${ui("aboutHi")} ${ui("aboutBody1")} ${ui("aboutBody2")}`, label: ui("aboutTitle") },
         { text: `${ui("promiseTitle")}. ${promises.join(" ")}`, label: ui("promiseTitle") },
         { text: `${ui("howTitle")}. ${how.map((h) => `${h.title}. ${h.body}`).join(" ")}`, label: ui("howTitle") },
@@ -60,10 +64,11 @@ export default function Landing() {
         <section className="mx-auto grid max-w-6xl items-center gap-8 px-5 pb-10 pt-8 md:grid-cols-[1.15fr_0.85fr] md:pt-14">
           <div className="rise">
             <span className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-sun px-3.5 py-1 text-[0.95rem] font-bold shadow-[0_2px_0_var(--ink)]">
-              <Heart size={16} fill="currentColor" className="text-coral" aria-hidden /> {ui("heroKicker")}
+              <Heart size={16} fill="currentColor" className="text-coral" aria-hidden /> {ui("heroKicker", { state: st.name })}
             </span>
             <h1 className="mt-5 font-display text-[2.6rem] font-bold leading-[1.05] text-accent-ink sm:text-[3.4rem]">{ui("heroTitle")}</h1>
             <p className="mt-4 max-w-xl text-[1.25rem] leading-relaxed text-ink-2">{ui("heroBody")}</p>
+            <GuideOnlyNotice className="mt-5 max-w-xl" />
             <div className="mt-7 flex flex-wrap gap-3">
               <Link href="/form" className="btn bg-accent px-6 py-4 text-[1.25rem] text-white hover:bg-accent-ink">
                 {startLabel} <ArrowRight size={24} aria-hidden className="rtl:rotate-180" />
@@ -164,6 +169,11 @@ export default function Landing() {
           </ul>
         </section>
 
+        {/* Your state */}
+        <section id="your-state" className="mx-auto max-w-6xl px-5 py-8">
+          <StateHelp />
+        </section>
+
         {/* Good to know */}
         <section className="mx-auto max-w-6xl px-5 py-8">
           <div className="card bg-mint-soft p-6 md:p-8">
@@ -171,10 +181,10 @@ export default function Landing() {
               <Lightbulb size={26} className="text-mint-ink" aria-hidden /> {ui("goodToKnow")}
             </h2>
             <ul className="mt-3 space-y-2">
-              {MESSAGES.map((_, i) => (
-                <li key={i} className="flex gap-2 text-[1.08rem] leading-relaxed">
+              {messageKeys.map((k) => (
+                <li key={k} className="flex gap-2 text-[1.08rem] leading-relaxed">
                   <span aria-hidden className="mt-2.5 size-2 shrink-0 rounded-full bg-mint-ink" />
-                  {t(`m.${i}`)}
+                  {t(k)}
                 </li>
               ))}
             </ul>
