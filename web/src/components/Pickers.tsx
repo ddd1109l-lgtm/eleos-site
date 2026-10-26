@@ -81,8 +81,9 @@ function SearchPicker({
       </button>
       {open && (
         <div
-          className="pop absolute right-0 top-14 z-50 w-[min(21rem,calc(100vw-1.5rem))] rounded-3xl border-2 border-ink bg-white p-3 shadow-[0_5px_0_var(--ink)]"
-          style={{ transformOrigin: "top right" }}
+          // On phones the buttons sit mid-header, so the menu spans the screen instead of hanging off one edge.
+          className="pop fixed inset-x-3 top-[4.75rem] z-50 rounded-3xl border-2 border-ink bg-white p-3 shadow-[0_5px_0_var(--ink)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-14 sm:w-[21rem]"
+          style={{ transformOrigin: "top center" }}
         >
           <p className="px-1 pb-2 font-display text-[1.15rem] font-bold">{title}</p>
           <div className="flex items-center gap-2 rounded-xl border-2 border-ink px-3 focus-within:ring-4 focus-within:ring-accent/20">
