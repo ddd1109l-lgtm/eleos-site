@@ -19,7 +19,7 @@ export type Field = {
 };
 
 // Where the answer sits on one of the SAMPLE mock documents.
-export type DocId = "medicare_card" | "award_letter" | "bank_statement";
+export type DocId = "medicare_card" | "award_letter" | "bank_statement" | "pay_stub" | "pension";
 export type DocSpot = { id: DocId; spot: string };
 
 export type Section = {

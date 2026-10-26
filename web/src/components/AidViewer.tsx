@@ -14,6 +14,8 @@ const DOC_AIDS: Record<string, { id: DocId; spot: string }> = {
   "doc.medicare_card.number": { id: "medicare_card", spot: "number" },
   "doc.award_letter.before_deductions": { id: "award_letter", spot: "before" },
   "doc.bank_statement.balance": { id: "bank_statement", spot: "balance" },
+  "doc.pay_stub.gross": { id: "pay_stub", spot: "gross" },
+  "doc.pension.gross": { id: "pension", spot: "gross" },
 };
 
 export default function AidViewer({ aid, onClose, closeLabel }: { aid: Aid; onClose: () => void; closeLabel: string }) {

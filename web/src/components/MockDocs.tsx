@@ -8,7 +8,11 @@ type Props = { spot?: string; compact?: boolean };
 export default function MockDoc({ id, spot, compact }: Props & { id: DocId }) {
   if (id === "medicare_card") return <MedicareCard spot={spot} compact={compact} />;
   if (id === "award_letter") return <AwardLetter spot={spot} compact={compact} />;
-  return <BankStatement spot={spot} compact={compact} />;
+  if (id === "bank_statement") return <BankStatement spot={spot} compact={compact} />;
+  if (id === "pay_stub") return <PayStub spot={spot} compact={compact} />;
+  if (id === "pension") return <PensionStatement spot={spot} compact={compact} />;
+  const unknown: never = id;
+  return unknown;
 }
 
 function Spot({ on, children, className = "" }: { on: boolean; children: React.ReactNode; className?: string }) {
@@ -115,6 +119,84 @@ function BankStatement({ spot, compact }: Props) {
         <span>Ending balance</span>
         <strong>$2,412.36</strong>
       </Spot>
+      <Stamp />
+    </div>
+  );
+}
+
+function PayStub({ spot, compact }: Props) {
+  return (
+    <div className={`relative rounded-xl border-2 border-ink bg-white px-4 py-3 font-sans text-ink shadow-[0_3px_0_var(--ink)] ${compact ? "text-[0.78rem]" : "text-[0.9rem]"}`}>
+      <div className="flex items-baseline justify-between gap-3 border-b border-line pb-1.5">
+        <span className="font-bold">Bayou Pharmacy (SAMPLE)</span>
+        <span className="text-[0.75em] text-muted">Pay stub</span>
+      </div>
+      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 pt-2 text-[0.85em]">
+        <span className="text-muted">Employee</span>
+        <span>GLORIA SAMPLE</span>
+        <span className="text-muted">Pay period</span>
+        <span>Sep 14 – Sep 27, 2026</span>
+        <span className="text-muted">Pay date</span>
+        <span>Oct 2, 2026</span>
+        <span className="text-muted">Employee no.</span>
+        <span className="font-mono">SAMPLE-0000</span>
+      </div>
+      <div className="mt-2 space-y-1 border-t border-line pt-1.5 text-[0.9em]">
+        <Spot on={spot === "gross"} className="flex justify-between gap-3">
+          <span>Gross pay (before taxes)</span>
+          <strong>$600.00</strong>
+        </Spot>
+        <div className="flex justify-between gap-3 px-1.5">
+          <span>Federal income tax</span>
+          <span>−$32.00</span>
+        </div>
+        <div className="flex justify-between gap-3 px-1.5">
+          <span>Social Security and Medicare tax</span>
+          <span>−$45.90</span>
+        </div>
+        <div className="flex justify-between gap-3 px-1.5">
+          <span>Louisiana income tax</span>
+          <span>−$9.00</span>
+        </div>
+        <div className="flex justify-between gap-3 border-t border-line px-1.5 pt-1">
+          <span>Net pay (take-home)</span>
+          <span>$513.10</span>
+        </div>
+      </div>
+      <Stamp />
+    </div>
+  );
+}
+
+function PensionStatement({ spot, compact }: Props) {
+  return (
+    <div className={`relative rounded-xl border-2 border-ink bg-white px-4 py-3 font-sans text-ink shadow-[0_3px_0_var(--ink)] ${compact ? "text-[0.78rem]" : "text-[0.9rem]"}`}>
+      <div className="border-b border-line pb-1.5">
+        <div className="font-bold">City of New Orleans Retirement System (SAMPLE)</div>
+        <div className="text-[0.75em] text-muted">Pension payment statement · Made-up example</div>
+      </div>
+      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 pt-2 text-[0.85em]">
+        <span className="text-muted">Retiree</span>
+        <span>RAY SAMPLE</span>
+        <span className="text-muted">Payment date</span>
+        <span>Oct 1, 2026</span>
+        <span className="text-muted">Member no.</span>
+        <span className="font-mono">SAMPLE-0000</span>
+      </div>
+      <div className="mt-2 space-y-1 border-t border-line pt-1.5 text-[0.9em]">
+        <Spot on={spot === "gross"} className="flex justify-between gap-3">
+          <span>Gross monthly benefit</span>
+          <strong>$500.00</strong>
+        </Spot>
+        <div className="flex justify-between gap-3 px-1.5">
+          <span>Federal tax withheld</span>
+          <span>−$50.00</span>
+        </div>
+        <div className="flex justify-between gap-3 border-t border-line px-1.5 pt-1">
+          <span>Net payment</span>
+          <span>$450.00</span>
+        </div>
+      </div>
       <Stamp />
     </div>
   );
